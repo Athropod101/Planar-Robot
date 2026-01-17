@@ -1,12 +1,16 @@
 from dataclasses import dataclass
-# Data Structures
+
+SampleTime: tuple[float]
 
 # Motor Data
 Torque: float
 Resistance: float
 MotorConst: float
 
-# Wheel Data
+# Robot Data
 WheelRadius: float
+Differential: float
 
-# 
+# Sensor Data
+NoiseMean: float
+NoiseSTDDev: float
