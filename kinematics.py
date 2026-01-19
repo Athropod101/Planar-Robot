@@ -1,42 +1,85 @@
+import data_structures as ds
 import numpy as np
 import scipy as sc
 import math as m
-from dataclasses import dataclass
 
-@dataclass
 class Kinematics:
-    WheelRadius: float
-    Differential: float
-    SampleTime: float
+    def __init__(self, RobotData, InitialPosition, SampleTime):
+        self.WheelRadius  = RobotData["WheelRadius"]
+        self.Differential = RobotData["Differential"]
+        self.SampleTime   = SampleTime
+        
+        self.Theta        = InitialPosition[0].item()
+        self.y            = InitialPosition[1].item()
 
-    y: list[float] = 0
-    Theta: list[float] = 0
-    x = [0]                 #   x is assumed to start at 0 by assumption. 
-    
-    Omega: list[float] = []
-    Vx: list[float] = []
-    Vy: list[float] = []
+    def __post_init__(self):
+        self.x:     float = 0
+        self.Omega: float = 0
+        self.Vy:    float = 0
+        self.Vx:    float = 0
 
+    '''
+    These methods are not meant to be executed individually but rather executed by the FindPosistion() method.
+    These sub-methods are defined individually to help organize the code.
+    '''
     def FindOmega(self, LeftOmega: float, RightOmega: float) -> None:
-        OmegaNew = 2*self.WheelRadius/self.Differential*(RightOmega - LeftOmega)
-        self.Omega.append(OmegaNew)
+        self.Omega = 2*self.WheelRadius/self.Differential*(RightOmega - LeftOmega)
 
     def FindTheta(self, LeftOmega: float, RightOmega: float) -> None:
         self.FindOmega(LeftOmega, RightOmega)
-        DelTheta = Omega[-1]*self.SampleTime
-        self.Theta.append(Theta[-1] + DelTheta)
+        DelTheta = self.Omega*self.SampleTime
+        self.Theta = self.Theta + DelTheta
 
-    def FindVx(self, LeftOmega: float, RightOmega: float) -> None:
+    def FindVelocities(self, LeftOmega: float, RightOmega: float) -> None:
         self.FindTheta(LeftOmega, RightOmega)
-        VxNew = (LeftOmega + RightOmega)*self.WheelRadius/2*m.cos(Theta[-1])
-        self.Vx.append(VxNew)
+        self.Vx = (RightOmega + LeftOmega)*self.WheelRadius/2*m.cos(self.Theta)
+        self.Vy = self.Vx*m.tan(self.Theta)
 
-    def FindVy(self, LeftOmega: float, RightOmega: float) -> None:
-        self.FindTheta(LeftOmega, RightOmega)
-        Vy = (LeftOmega + RightOmega)*self.WheelRadius/2*m.sin(Theta[-1])
-"""Debugging continues after here"""
-    def FindX(self, LeftOmega: float, RightOmega: float) -> None:
+    '''
+    These are the methods that should actually be used by simulation.py.
+    '''
+    def FindKinematics(self, LeftOmega: float, RightOmega: float) -> None:
+        self.FindVelocities(LeftOmega, RightOmega)
+        self.x = self.Vx*self.SampleTime
+        self.y = self.Vy*self.SampleTime
 
+    def ReturnPositionVector(self) -> ds.PositionVector:
+        return ds.PositionVector(self.Theta, self.y, self.x)
 
-    def FindDelY(self, LeftOmega: float, RightOmega: float) -> None:
-        Vy = FindVy(LeftOmega, RightOmega)
+    def ReturnPose(self) -> ds.Pose:
+        return ds.Pose(self.Theta, self.y, self.x)
+    
+def main() -> None:
+    RobotData = {"WheelRadius" : 0.02, "Differential" : 0.1}
+    InitialPosition = np.array([[0], [0], [0]])
+    SampleTime = 1
+
+    # Test at no Velocity Differential
+    OL = 2
+    OR = 2
+
+    KinSample = Kinematics(RobotData, InitialPosition, SampleTime)
+    KinSample.FindKinematics(OL, OR)
+    print(KinSample.ReturnPositionVector())
+    print(KinSample.ReturnPose())
+
+    # Test at positive Velocity Differential
+    OL = 2
+    OR = 2.5
+
+    KinSample = Kinematics(RobotData, InitialPosition, SampleTime)
+    KinSample.FindKinematics(OL, OR)
+    print(KinSample.ReturnPositionVector())
+    print(KinSample.ReturnPose())
+
+    # Test at negative Velocity Differential
+    OL = 3
+    OR = 2
+
+    KinSample = Kinematics(RobotData, InitialPosition, SampleTime)
+    KinSample.FindKinematics(OL, OR)
+    print(KinSample.ReturnPositionVector())
+    print(KinSample.ReturnPose())
+
+if __name__ == "__main__":
+    main()

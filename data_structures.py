@@ -1,21 +1,31 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
+np.set_printoptions(formatter={'float': '{:.4f}'.format})
 import math as m
+from typing import TypedDict
 
 SampleTime: tuple[float]
 
-# Motor Data
-Torque: float
-Resistance: float
-MotorConst: float
+class MotorData(TypedDict):
+    Torque: float
+    Resistance: float
+    MotorConst: float
 
-# Robot Data
-WheelRadius: float
-Differential: float
+class RobotData(TypedDict):
+    WheelRadius: float
+    Differential: float
 
-# Sensor Data
-NoiseMean: float
-NoiseSTDDev: float
+class SensorData(TypedDict):
+    NoiseMean: float
+    NoiseDev: float
+
+class PositionVector:
+    def __init__(self, Theta, y, x):
+        self.PositionVector = np.array([[Theta], [y], [x]])
+
+    def __repr__(self):
+        print(self.PositionVector)
+        return ""
 
 # Pose Type
 @dataclass
@@ -24,8 +34,20 @@ class Pose:
     x:      float = 0
     y:      float = 0
 
-    self.Pose = np.array[
-            [m.cos(Theta) -m.sin(Theta) x],
-            [m.sin(Theta)  m.cos(Theta) y],
-            [0             0            1]
-            ]
+    def __post_init__(self):
+        self.Pose = np.array([
+            [m.cos(self.Theta), -m.sin(self.Theta), self.x],
+            [m.sin(self.Theta),  m.cos(self.Theta), self.y],
+            [0,                  0,                 1     ]
+            ])
+
+    def __repr__(self):
+        print(self.Pose)
+        return ""
+
+def main() -> None:
+    TransformTest = Pose(m.pi/4, 0, 5)
+    print(TransformTest)
+
+if __name__ == "__main__":
+    main()

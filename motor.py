@@ -1,13 +1,12 @@
-from dataclasses import dataclass
-
-@dataclass
 class Motor:
-    Torque: float
-    Resistance: float
-    MotorConst: float
+    def __init__(self, MotorData):
+        self.Torque = MotorData["Torque"]
+        self.Resistance = MotorData["Resistance"]
+        self.MotorConst = MotorData["MotorConst"]
 
-    b = Torque*Resistance/MotorConst**2
-    m = 1/MotorConst
+    def __post_init__(self):
+        b: float = Torque*Resistance/MotorConst**2
+        m: float = 1/MotorConst
 
     def FindOmega(self, Voltage: float) -> float:
         return Voltage*self.m - self.b
