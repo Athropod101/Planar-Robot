@@ -10,6 +10,8 @@ class MotorData(TypedDict):
     Torque: float
     Resistance: float
     MotorConst: float
+    MaxVoltage: float
+    MinVoltage: float
 
 class RobotData(TypedDict):
     WheelRadius: float
