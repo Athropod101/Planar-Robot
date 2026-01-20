@@ -2,6 +2,8 @@ from sensor import Sensor
 from motor import Motor
 from kinematics import Kinematics
 
+SampleTime = 0.1
+
 MotorData = {
         'Torque'    : 0.15,     # Nm
         'Resistance': 0.0001139,# Ohm
@@ -15,11 +17,18 @@ RobotData = {
         'Differential': 0.1  # m
         }
 
+InitialPosition = np.array([
+    [0],
+    [0],
+    [0]
+    ]
+
 SensorData = {
         'NoiseMean': 0 # rad/s
         'NoiseDev': 10 # percentage
         }
 
+RobotMotion = Kinematics(RoboData, InitialPosition, SampleTime)
 
 LeftMotor = Motor(MotorData)
 RightMotor = Motor(MotorData)
