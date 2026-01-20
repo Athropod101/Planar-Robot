@@ -1,5 +1,5 @@
 import numpy as np
-import math as m
 
-Test = 1
-print(m.cos(Test))
+for i in range(10):
+    print(np.random.normal(0, 0.5))
+

@@ -1,3 +1,6 @@
+NOTES THAT NEED BE ORGANIZED:
+1. sensor.py creates an error proportional to the motor's current speed. This technically means that at still, the robot's sensor picks up zero error, which is not true. State this in the final report and say that it wasn't necessary to correct for the purposes of this simulation. 
+
 # Assumptions
 1. Robot Dynamics already taken into account as part of the input. This assumption simplifies:
     * Defining motor parameters to voltage and angular velocity ranges as well.
