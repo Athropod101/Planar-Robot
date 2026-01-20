@@ -7,8 +7,9 @@ class Motor:
         self.MinVoltage = MotorData["MinVoltage"]
 
     def __post_init__(self):
-        b: float = Torque*Resistance/MotorConst**2
-        m: float = 1/MotorConst
+        self.b: float = Torque*Resistance/MotorConst**2
+        self.m: float = 1/MotorConst
+        self.MotorControl: list[float] = [self.m, self.b]
 
     def WriteVoltage(self, Voltage: float) -> float:
         V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage

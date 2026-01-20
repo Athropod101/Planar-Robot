@@ -1,5 +1,5 @@
 import data_structures as ds
-import numpy as np
+mport numpy as np
 import scipy as sc
 import math as m
 
@@ -17,6 +17,7 @@ class Kinematics:
         self.Omega: float = 0
         self.Vy:    float = 0
         self.Vx:    float = 0
+        self.KinematicControl: float = (self.WheelRadius*self.SampleTime)**2/self.Differential
 
     '''
     These methods are not meant to be executed individually but rather executed by the FindPosistion() method.

@@ -1,6 +1,3 @@
-NOTES THAT NEED BE ORGANIZED:
-1. sensor.py creates an error proportional to the motor's current speed. This technically means that at still, the robot's sensor picks up zero error, which is not true. State this in the final report and say that it wasn't necessary to correct for the purposes of this simulation. 
-
 # Assumptions
 1. Robot Dynamics already taken into account as part of the input. This assumption simplifies:
     * Defining motor parameters to voltage and angular velocity ranges as well.
@@ -10,6 +7,8 @@ NOTES THAT NEED BE ORGANIZED:
     * $y = y_{o}$
     * $\theta  = \theta_{o}$
 3. The error noise processed by sensor.py accounts for all extraneous variables in addition to motor uncertainties. 
+1. Sensor noise can be approximated as gausian noise with a given mean and a standard deviation proportional to the robot's current velocity.
+1. Torque on the motor is constant.
 
 # Appendix
 This portion of README.md contains documentation for each file of the program. It need not be read to understand how to run the program. 

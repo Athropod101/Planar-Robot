@@ -21,6 +21,11 @@ class SensorData(TypedDict):
     NoiseMean: float
     NoiseDev: float
 
+class PIDConstants(TypedDict):
+    P: float
+    I: float
+    D: float
+
 class PositionVector:
     def __init__(self, Theta, y, x):
         self.PositionVector = np.array([[Theta], [y], [x]])
