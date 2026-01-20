@@ -1,6 +1,5 @@
 import data_structures as ds
-mport numpy as np
-import scipy as sc
+import numpy as np
 import math as m
 
 class Kinematics:
@@ -12,11 +11,7 @@ class Kinematics:
         self.Theta        = InitialPosition[0].item()
         self.y            = InitialPosition[1].item()
 
-    def __post_init__(self):
-        self.x:     float = 0
-        self.Omega: float = 0
-        self.Vy:    float = 0
-        self.Vx:    float = 0
+        # Post-Init
         self.KinematicControl: float = (self.WheelRadius*self.SampleTime)**2/self.Differential
 
     '''
@@ -63,6 +58,8 @@ def main() -> None:
     KinSample.FindKinematics(OL, OR)
     print(KinSample.ReturnPositionVector())
     print(KinSample.ReturnPose())
+    with np.printoptions(formatter={'float': '{:.8f}'.format}):
+        print(f'KinematicControl: P = {KinSample.KinematicControl}\n')
 
     # Test at positive Velocity Differential
     OL = 2
