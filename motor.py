@@ -10,7 +10,6 @@ class Motor:
         self.b: float = self.Torque*self.Resistance/self.MotorConst**2
         self.m: float = 1/self.MotorConst
         self.MotorControl: list[float] = [self.m, self.b]
-        print(self.b, self.m)
 
     def WriteVoltage(self, Voltage: float) -> float:
         V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage

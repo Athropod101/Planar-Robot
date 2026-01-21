@@ -18,12 +18,12 @@ class Control:
 
     def __repr__(self):
         rep = (
-            f'Set Point            : y = {self.SetPoint} m\n'
-            f'Set Voltage          : V = {self.Vset} V\n'
-            f'Set Motor Speed      : w = {self.OmegaBar} rad/s\n'
-            f'Proportional Constant: Kp =  {self.K['P']}\n'
-            f'Integral Constant    : Ki = {self.K['I']} 1/s\n'
-            f'Derivative Constant  : Kd = {self.K['D']} s\n'
+            f"Set Point            : y = {self.SetPoint} m\n"
+            f"Set Voltage          : V = {self.Vset} V\n"
+            f"Set Motor Speed      : w = {self.OmegaBar} rad/s\n"
+            f"Proportional Constant: Kp =  {self.K['P']}\n"
+            f"Integral Constant    : Ki = {self.K['I']} 1/s\n"
+            f"Derivative Constant  : Kd = {self.K['D']} s\n"
             )
         return rep
 

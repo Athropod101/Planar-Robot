@@ -20,7 +20,7 @@ def main() -> None:
     print(Test)
 
     for i in range(10):
-        print(Test.AddNoise(0))
+        print(Test.AddNoise(1))
 
 if __name__ == "__main__":
     main()
