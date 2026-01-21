@@ -35,18 +35,15 @@ class Control:
         self.ErrorTuned = PTune + self.ITune + DTune
         self.Error = NewError
 
-        print(
-                f'P: {PTune}\n'
-                f'I: {self.ITune}\n'
-                f'D: {DTune}\n'
-                )
-
-    def _FindAlpha(self, yNew) -> None:
-        self._PIDTune(yNew)
-        self.alpha = m.sqrt(self.ErrorTuned*self.P + 1)
+    def _FindAlpha(self) -> None:
+        if self.ErrorTuned <= 0:
+            self.alpha = m.sqrt(self.ErrorTuned*self.P + 1) if self.ErrorTuned >= -1/self.P else 0
+        else:
+            self.alpha = m.sqrt(1 - self.ErrorTuned*self.P) if self.ErrorTuned <= 1/self.P else 0
         
     def FindVoltages(self, yNew: float) -> list[float]:
-        self._FindAlpha(yNew)
+        self._PIDTune(yNew)
+        self._FindAlpha()
         V = (self.OmegaBar*self.alpha + self.b)/self.m
         print(
                 f'Position   : {yNew}\n'
@@ -54,7 +51,7 @@ class Control:
                 f'Error      : {self.Error}\n'
                 f'Tuned Error: {self.ErrorTuned}\n'
                 )
-        if self.alpha <= 1:
+        if self.ErrorTuned > 0:
             return [self.Vset, V]
         else:
             return [V, self.Vset]
@@ -70,6 +67,8 @@ def main() -> None:
 
     Controller = Control(MotorControl, KinematicControl, SetVoltage, PIDConstants, SetPoint, SampleTime, InitialPosition)
     print(Controller.FindVoltages(-0.1))
+    print(Controller.FindVoltages(0.1))
+    print(Controller.FindVoltages(0))
 
 if __name__ == "__main__":
     main()
