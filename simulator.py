@@ -6,10 +6,10 @@ SampleTime = 0.1
 
 MotorData = {
         'Torque'    : 0.15,     # Nm
-        'Resistance': 0.0001139,# Ohm
-        'MotorConst': 0.002856, # V/rad
-        'MaxVoltage': 3,        # V
-        'MinVoltage': 6         # V
+        'Resistance': 0.9470,# Ohm
+        'MotorConst': 0.2604, # V/rad
+        'MaxVoltage': 6,        # V
+        'MinVoltage': 3         # V
         }
 
 RobotData = {
@@ -35,4 +35,3 @@ RightMotor = Motor(MotorData)
 
 LeftSensor = Sensor(SensorData)
 RightSensor = Sensor(SensorData)
-''' IMPORTANT: kinematics must be instantiated before sensor!'''
