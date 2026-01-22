@@ -5,7 +5,7 @@ from kinematics import Kinematics
 import numpy as np
 import time
 
-SampleTime = 0.001
+SampleTime = 1
 
 MotorData = {
     'Torque'    : 0.15,     # Nm
@@ -16,7 +16,7 @@ MotorData = {
     }
 
 RobotData = {
-    'WheelRadius' : 0.05, # m
+    'WheelRadius' : 0.02, # m
     'Differential': 0.1  # m
     }
 
@@ -62,7 +62,8 @@ print(Controller)
 
 NewPos = InitialPosition
 i = 0
-while Controller.Error > 0.0001:
+while abs(Controller.Error) > 0.0001:
+    print(f"\nCurrent Error: {Controller.Error}\n")
     V = Controller.FindVoltages(NewPos[1].item())
     IdealLeftOmega = LeftMotor.WriteVoltage(V[0])
     IdealRightOmega = RightMotor.WriteVoltage(V[1])
