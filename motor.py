@@ -11,7 +11,8 @@ class Motor:
     def __post_init__(self):
         self.b: float = self.Torque*self.Resistance/self.MotorConst**2
         self.m: float = 1/self.MotorConst
-        self.MotorControl: dict[float] = {'m': self.m, 'b': self.b}
+        self.dV_cap: float = self.MaxVoltage - self.MinVoltage
+        self.MotorControl: dict[float] = {'m': self.m, 'dV_cap': self.dV_cap}
 
     def __repr__(self) -> str:
         rep = (
@@ -24,7 +25,7 @@ class Motor:
 
     def WriteVoltage(self, Voltage: float) -> float:
         V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage
-        Omega = (V*self.m - self.b) if Voltage >= self.MinVoltage else 0
+        Omega = (V*self.m - self.b) if Voltage >= self.MinVoltage else self.MinVoltage
         return Omega
 
 '''Testing'''

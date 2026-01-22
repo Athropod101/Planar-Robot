@@ -4,75 +4,60 @@ from dataclasses import dataclass
 
 @dataclass
 class Control:
-    y_set: float
-    y_o  : float
-    V_set: float
-    dt   : float
-    p    : float
-    m    : float
-    b    : float
-    kP   : float
-    kI   : float
-    kD   : float
-
+    y_set : float
+    V_set : float
+    dt    : float
+    kP    : float
+    kI    : float
+    kD    : float
+    DWR   : float
+    m     : float
+    V_max : float
+    V_min : float
+    
     def __post_init__(self):
-        self.OmegaBar = self.V_set*self.m - self.b
-        self.P = 1/(self.p*self.OmegaBar**2)
-        self.Error = self.y_o - self.y_set
-        self.ITune = 0
-
-    def __repr__(self):
-        rep = (
-                f"Set Point            : y  = {self.y_set:4.2f} m\n"
-                f"Set Voltage          : V  = {self.V_set:4.2f} V\n"
-                f"Set Motor Speed      : w  = {int(self.OmegaBar*30/m.pi):4d} rpm\n"
-                f"Proportional Constant: kp = {self.kP:4.2f}\n"
-                f"Integral Constant    : ki = {self.kI:4.2f} 1/s\n"
-                f"Derivative Constant  : kd = {self.kD:4.2f} s\n"
-                f"Kinematic Constant   : p  = {self.p:.4f}\n"
-                f"Plant Constant       : P  = {self.P:.4f}\n"
-                )
-        return rep
-
-    def _PIDTune(self, yNew) -> None:
-        NewError = yNew - self.y_set
-        PTune = self.kP*NewError
-        self.ITune += self.kI*NewError*self.kI
-        DTune = self.kD*(NewError - self.Error)/self.dt
-        self.ErrorTuned = PTune + self.ITune + DTune
-        self.Error = NewError
-
-    def _FindAlpha(self) -> None:
-        if self.ErrorTuned <= 0:
-            self.alpha = m.sqrt(self.ErrorTuned*self.P + 1) if self.ErrorTuned >= -1/self.P else 0
-        elif self.ErrorTuned >= 0:
-            self.alpha = m.sqrt(1 - self.ErrorTuned*self.P) if self.ErrorTuned <= 1/self.P else 0
-        else:
-            print("Robot error has exceeded control range. Alpha is imaginary.")
-        
-    def FindVoltages(self, yNew: float) -> list[float]:
-        self._PIDTune(yNew)
-        self._FindAlpha()
-        V = (self.OmegaBar*self.alpha + self.b)/self.m
-        print(
-                f'Position     : {yNew:1.2f} m\n'
-                f'Error        : {self.Error:1.2f} m\n'
-                f'Tuned Error  : {self.ErrorTuned:1.2f} m\n'
-                f'Alpha        : {self.alpha:1.2f}'
-                )
-        if self.ErrorTuned > 0:
+        self.IError    : float = 0
+        self.ThetaError: float = 0
+        if self.V_set > self.V_max:
             print(
-                    f"Left Voltage : {self.V_set:1.2f} V\n"
-                    f"Right Voltage: {V:1.2f} V\n"
+                    f"Target voltage ({self.V_set} V) exceeds maximum allowable voltage ({self.V_max} V).\n"
+                    f"Setting target voltage to maximum allowable voltage (V_set = {self.V_max} V).\n"
                     )
-            return [self.V_set, V]
-        else:
-            print(
-                    f"Left Voltage : {V} V\n"
-                    f"Right Voltage: {self.V_set} V\n"
-                    )
-            return [V, self.V_set]
+            self.V_set = self.V_max
+        self.dV_cap    : float = self.V_set - self.V_min
 
+    def _SetTheta(self, y_new) -> float:
+        yError   : float = y_new - y_set
+        Theta_set: float = m.arctan(yError)
+        return Theta_set
+
+    def _PIDTune(self, Theta_set, Theta_new) -> float:
+        ThetaError_new: float  = Theta_new - Theta_set
+        PTune         : float  = self.kP * ThetaError_new
+        self.ITune    : float += self.kI * ThetaError * self.dt
+        DTune         : float  = self.kD * (ThetaError_new * self.ThetaError) / self.dt
+        TunedError    : float  = PTune + self.ITune + DTune
+        return TunedError
+
+    def _FindAlpha(self, TunedError) -> float:
+        beta : float = self.DWR / self.m / self.dV_cap / self.dt
+        alpha: float = TunedError * beta
+        if alpha > 1 / beta:
+            alpha = 1
+        elif alpha < -1 / beta:
+            alpha = -1
+        return alpha
+
+    def FindVoltages(self, y_new, Theta_new) -> dict[float]:
+        Theta_set : float = self._SetTheta(y_new)
+        TunedError: float = self._PIDTune(Theta_set, Theta_new)
+        alpha     : float = self._FindAlpha(TunedError)
+        V         : float = abs(alpha) * self.dV_cap
+        if alpha >= 0:
+            return {'Left Voltage': self.V_set, 'Right Voltage': V}
+        else:
+            return {'Left Voltage': V, 'Right Voltage': self.V_set}
+    
 def main() -> None:
     MotorControl = {'m': 3.8397, 'b': 2.0944}
     KinematicControl = 0.004
