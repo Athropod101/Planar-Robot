@@ -1,15 +1,26 @@
-class Motor:
-    def __init__(self, MotorData):
-        self.Torque = MotorData["Torque"]
-        self.Resistance = MotorData["Resistance"]
-        self.MotorConst = MotorData["MotorConst"]
-        self.MaxVoltage = MotorData["MaxVoltage"]
-        self.MinVoltage = MotorData["MinVoltage"]
+from dataclasses import dataclass
 
-        # Post-Init
+@dataclass
+class Motor:
+    Torque     : float # Nm
+    Resistance : float # Ohm
+    MotorConst : float # Vs/rad
+    MaxVoltage : float # V
+    MinVoltage : float # V
+
+    def __post_init__(self):
         self.b: float = self.Torque*self.Resistance/self.MotorConst**2
         self.m: float = 1/self.MotorConst
         self.MotorControl: list[float] = [self.m, self.b]
+
+    def __repr__(self) -> str:
+        rep = (
+                f"Slope      : {self.m:.4f} rad/Vs\n"
+                f"Offset     : {self.b:.4f} rad/s\n"
+                f"Max Voltage: {float(self.MaxVoltage):.4f} V\n"
+                f"Min Voltage: {float(self.MinVoltage):.4f} V\n"
+                )
+        return rep
 
     def WriteVoltage(self, Voltage: float) -> float:
         V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage
@@ -17,7 +28,6 @@ class Motor:
         return Omega
 
 def main() -> None:
-
     MotorData = {
             'Torque'    : 0.15,     # Nm
             'Resistance': 0.9470,# Ohm
@@ -26,14 +36,15 @@ def main() -> None:
             'MinVoltage': 3         # V
             }
 
-    MotorTest = Motor(MotorData)
+    MotorTest = Motor(**MotorData)
 
-    print(MotorTest.WriteVoltage(0)*30/3.14)
-    print(MotorTest.WriteVoltage(2)*30/3.14)
-    print(MotorTest.WriteVoltage(3)*30/3.14)
-    print(MotorTest.WriteVoltage(5)*30/3.14)
-    print(MotorTest.WriteVoltage(6)*30/3.14)
-    print(MotorTest.WriteVoltage(7)*30/3.14)
+    print(MotorTest)
+    print(f"{int(MotorTest.WriteVoltage(0)*30/3.14):3d} rpm")
+    print(f"{int(MotorTest.WriteVoltage(2)*30/3.14):3d} rpm")
+    print(f"{int(MotorTest.WriteVoltage(3)*30/3.14):3d} rpm")
+    print(f"{int(MotorTest.WriteVoltage(5)*30/3.14):3d} rpm")
+    print(f"{int(MotorTest.WriteVoltage(6)*30/3.14):3d} rpm")
+    print(f"{int(MotorTest.WriteVoltage(7)*30/3.14):3d} rpm")
 
 if __name__ == "__main__":
     main()
