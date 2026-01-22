@@ -5,7 +5,7 @@ from kinematics import Kinematics
 import numpy as np
 import time
 
-SampleTime = 0.1
+SampleTime = 0.001
 
 MotorData = {
     'Torque'    : 0.15,     # Nm
@@ -22,19 +22,19 @@ RobotData = {
 
 InitialPosition = np.array([
     [0],
-    [10],
+    [0.5],
     [0]
     ])
 
 SensorData = {
-    'NoiseMean': 0, # rad/s
-    'NoiseDev': 0.1 # percentage
+    'Mean': 0, # rad/s
+    'Dev': 0.1 # percentage
     }
 
 PIDConstants = {
-    'P': 1.5,
-    'I': 0.5,
-    'D': 0.5
+    'kP': 1,
+    'kI': 0.5,
+    'kD': 0.5
     }
 
 SetVoltage = 5
@@ -42,12 +42,23 @@ SetPoint = 0
 
 RobotMotion = Kinematics(RobotData, InitialPosition, SampleTime)
 
-LeftMotor = Motor(MotorData)
-RightMotor = Motor(MotorData)
+LeftMotor = Motor(**MotorData)
+RightMotor = Motor(**MotorData)
 
-Sensor = Sensor(SensorData)
+Sensor = Sensor(**SensorData)
 
-Controller = Control(LeftMotor.MotorControl, RobotMotion.KinematicControl, SetVoltage, PIDConstants, SetPoint, SampleTime, InitialPosition)
+# Controller = Control(LeftMotor.MotorControl, RobotMotion.KinematicControl, SetVoltage, PIDConstants, SetPoint, SampleTime, InitialPosition)
+
+Controller = Control(
+        SetPoint,
+        InitialPosition[1].item(),
+        SetVoltage,
+        SampleTime,
+        RobotMotion.KinematicControl,
+        **LeftMotor.MotorControl,
+        **PIDConstants
+        )
+print(Controller)
 
 NewPos = InitialPosition
 i = 0
@@ -66,6 +77,7 @@ while Controller.Error > 0.0001:
     print("\r" "=============================\n", end="")
     time.sleep(SampleTime)
     i += 1
+    input("Press Enter to Continue.")
 
 print(
     f"The robot converged on the set point after:\n"

@@ -5,7 +5,7 @@ import math as m
 class Kinematics:
     def __init__(self, RobotData, InitialPosition, SampleTime):
         self.WheelRadius  = RobotData["WheelRadius"]
-        self.Differential = RobotData["Differential"]
+self.Differential = RobotData["Differential"]
         self.SampleTime   = SampleTime
         
         self.Theta        = InitialPosition[0].item()
@@ -58,7 +58,7 @@ def main() -> None:
     KinSample.FindKinematics(OL, OR)
     print(KinSample.ReturnPositionVector())
     print(KinSample.ReturnPose())
-    with np.printoptions(formatter={'float': '{:.8f}'.format}):
+    with np.set_printoptions(formatter={'float': '{:.4f}'.format})
         print(f'KinematicControl: P = {KinSample.KinematicControl}\n')
 
     # Test at positive Velocity Differential

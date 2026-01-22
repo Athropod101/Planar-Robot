@@ -11,7 +11,7 @@ class Motor:
     def __post_init__(self):
         self.b: float = self.Torque*self.Resistance/self.MotorConst**2
         self.m: float = 1/self.MotorConst
-        self.MotorControl: list[float] = [self.m, self.b]
+        self.MotorControl: dict[float] = {'m': self.m, 'b': self.b]
 
     def __repr__(self) -> str:
         rep = (
@@ -27,6 +27,7 @@ class Motor:
         Omega = (V*self.m - self.b) if Voltage >= self.MinVoltage else 0
         return Omega
 
+'''Testing'''
 def main() -> None:
     MotorData = {
             'Torque'    : 0.15,     # Nm
