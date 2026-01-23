@@ -1,21 +1,21 @@
 import math as m
-import numpy as np
 from dataclasses import dataclass
 
 @dataclass
 class Control:
-    y_set : float
-    V_set : float
-    dt    : float
-    DWR   : float
-    kP    : float
-    kI    : float
-    kD    : float
-    m     : float
-    V_max : float
-    V_min : float
+    y_set: float
+    V_set: float
+    dt   : float
+    DWR  : float
+    kP   : float
+    kI   : float
+    kD   : float
+    m    : float
+    V_max: float
+    V_min: float
     
     def __post_init__(self):
+        self.Theta_set : float = 0
         self.IError    : float = 0
         self.ThetaError: float = 0
         self.dV_cap    : float = self.V_set - self.V_min
@@ -31,6 +31,7 @@ class Control:
     def __repr__(self):
         rep = (
                 f"Set Point         : {float(self.y_set):5.2f} m\n"
+                f"Set Angle         : {float(self.Theta_set):5.2f} rad\n"
                 f"Set Voltage       : {float(self.V_set):5.2f} V\n"
                 f"Proportional      : {float(self.kP):5.2f}\n"
                 f"Integral          : {float(self.kI):5.2f} 1/s\n"
@@ -43,10 +44,10 @@ class Control:
     def _SetTheta(self, y_new) -> float:
         self.yError   : float = y_new - self.y_set
         Theta_set: float = m.atan(-self.yError)
+        self.Theta_set = Theta_set
         if __name__ == "__main__":
             print(
-                    f"Position Error    : {float(self.yError):5.2f} m\n"
-                    f"Set Angle         : {float(Theta_set):5.2f} rad\n"
+                    f"Position Error    : {float(self.yError):5.2f} m"
                     )
         return Theta_set
 
@@ -63,24 +64,26 @@ class Control:
                     f"Proportional Error: {float(PError):5.2f} rad\n"
                     f"Integral Error    : {float(self.IError):5.2f} rad\n"
                     f"Derivative Error  : {float(DError):5.2f} rad\n"
-                    f"Tuned Error       : {float(TunedError):5.2f} rad\n"
+                    f"Tuned Error       : {float(TunedError):5.2f} rad"
                     )
         return TunedError
 
     def _FindAlpha(self, TunedError) -> float:
         beta : float = self.beta
         alpha: float = TunedError * beta
+        if __name__ == "__main__":
+            print(f"Alpha             : {float(alpha):5.2f}\n")
         if alpha > 1:
             alpha = 1
         elif alpha < -1:
             alpha = -1
-        return abs(alpha)
+        return alpha
 
     def FindVoltages(self, y_new, Theta_new) -> dict[float]:
         Theta_set : float = self._SetTheta(y_new)
         TunedError: float = self._PIDTune(Theta_set, Theta_new)
         alpha     : float = self._FindAlpha(TunedError)
-        V         : float = self.V_set - alpha * self.dV_cap
+        V         : float = self.V_set - abs(alpha) * self.dV_cap
         if alpha > 0:
             return {'Left Voltage': self.V_set, 'Right Voltage': V}
         elif alpha < 0:

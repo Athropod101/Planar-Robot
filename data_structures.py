@@ -4,7 +4,7 @@ np.set_printoptions(formatter={'float': '{:.4f}'.format})
 import math as m
 from typing import TypedDict
 
-SampleTime: tuple[float]
+SampleTime: float
 
 class MotorData(TypedDict):
     Torque: float
@@ -22,17 +22,16 @@ class SensorData(TypedDict):
     NoiseDev: float
 
 class PIDConstants(TypedDict):
-    P: float
-    I: float
-    D: float
+    kP: float
+    kI: float
+    kD: float
 
 class PositionVector:
-    def __init__(self, Theta, y, x):
-        self.PositionVector = np.array([[Theta], [y], [x]])
+    def __init__(self, Theta, x, y):
+        self.PositionVector = np.array([[Theta], [x], [y]])
 
     def __repr__(self):
-        print(self.PositionVector)
-        return ""
+        return f"{self.PositionVector}"
 
 # Pose Type
 @dataclass
@@ -49,8 +48,7 @@ class Pose:
             ])
 
     def __repr__(self):
-        print(self.Pose)
-        return ""
+        return f"{self.Pose}"
 
 def main() -> None:
     TransformTest = Pose(m.pi/4, 0, 5)
