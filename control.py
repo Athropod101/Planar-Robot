@@ -41,11 +41,11 @@ class Control:
         return rep
 
     def _SetTheta(self, y_new) -> float:
-        yError   : float = y_new - self.y_set
-        Theta_set: float = m.atan(-yError)
+        self.yError   : float = y_new - self.y_set
+        Theta_set: float = m.atan(-self.yError)
         if __name__ == "__main__":
             print(
-                    f"Position Error    : {float(yError):5.2f} m\n"
+                    f"Position Error    : {float(self.yError):5.2f} m\n"
                     f"Set Angle         : {float(Theta_set):5.2f} rad\n"
                     )
         return Theta_set
@@ -54,8 +54,9 @@ class Control:
         ThetaError_new: float  = Theta_new - Theta_set
         PError        : float  = self.kP * ThetaError_new
         self.IError           += self.kI * ThetaError_new * self.dt
-        DError        : float  = self.kD * (ThetaError_new * self.ThetaError) / self.dt
+        DError        : float  = self.kD * (ThetaError_new - self.ThetaError) / self.dt
         TunedError    : float  = PError + self.IError + DError
+        self.ThetaError = ThetaError_new
         if __name__ == "__main__":
             print(
                     f"Orientation Error : {float(ThetaError_new):5.2f} rad\n"
@@ -69,8 +70,6 @@ class Control:
     def _FindAlpha(self, TunedError) -> float:
         beta : float = self.beta
         alpha: float = TunedError * beta
-        print(f"Raw Alpha  : {alpha:.4f}")
-        print(f"Raw Voltage: {alpha * self.dV_cap:.4f} V")
         if alpha > 1:
             alpha = 1
         elif alpha < -1:
@@ -81,7 +80,6 @@ class Control:
         Theta_set : float = self._SetTheta(y_new)
         TunedError: float = self._PIDTune(Theta_set, Theta_new)
         alpha     : float = self._FindAlpha(TunedError)
-        print(f"Alpha      : {alpha:.4f}")
         V         : float = self.V_set - alpha * self.dV_cap
         if alpha > 0:
             return {'Left Voltage': self.V_set, 'Right Voltage': V}

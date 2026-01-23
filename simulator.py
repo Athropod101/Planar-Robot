@@ -4,8 +4,9 @@ from control import Control
 from kinematics import Kinematics
 import numpy as np
 import time
+import math as m
 
-SampleTime = 1
+SampleTime = 0.1
 
 MotorData = {
     'Torque'    : 0.15,     # Nm
@@ -22,13 +23,13 @@ RobotData = {
 
 InitialPosition = np.array([
     [0],
-    [0.5],
+    [9],
     [0]
     ])
 
 SensorData = {
     'Mean': 0, # rad/s
-    'Dev': 0.1 # percentage
+    'Dev': 0.0 # percentage
     }
 
 PIDConstants = {
@@ -51,34 +52,68 @@ Sensor = Sensor(**SensorData)
 
 Controller = Control(
         SetPoint,
-        InitialPosition[1].item(),
         SetVoltage,
         SampleTime,
-        RobotMotion.KinematicControl,
+        RobotMotion.DWR,
+        **PIDConstants,
         **LeftMotor.MotorControl,
-        **PIDConstants
         )
-print(Controller)
 
 NewPos = InitialPosition
 i = 0
-while abs(Controller.Error) > 0.0001:
-    print(f"\nCurrent Error: {Controller.Error}\n")
-    V = Controller.FindVoltages(NewPos[1].item())
-    IdealLeftOmega = LeftMotor.WriteVoltage(V[0])
-    IdealRightOmega = RightMotor.WriteVoltage(V[1])
-    LeftOmega = Sensor.AddNoise(IdealLeftOmega)
-    RightOmega = Sensor.AddNoise(IdealRightOmega)
-    RobotMotion.FindKinematics(LeftOmega, RightOmega)
-    NewPos = RobotMotion.ReturnPositionVector()
-    NewPos = NewPos.PositionVector
-    NewPose = RobotMotion.ReturnPose()
+y_val = NewPos[1].item()
+u_val = NewPos[0].item()
+V = Controller.FindVoltages(y_val, u_val)
+while abs(Controller.yError + Controller.ThetaError) > 0.01:
+    '''Error Data'''
+    print(
+            f"[ C O N T R O L ]\n"
+            f"Set Point    : {float(Controller.y_set):5.2f} m\n"
+            f"y-Error      : {float(Controller.yError):5.2f} m\n"
+            f"Theta-Error  : {float(Controller.ThetaError):5.2f} rad\n"
+            f"Error Sum    : {float(Controller.yError + Controller.ThetaError):5.2f}\n"
+            f"Left Voltage : {float(V['Left Voltage']):5.2f} V\n"
+            f"Right Voltage: {float(V['Right Voltage']):5.2f} V\n"
+            )
+    
+    '''Motor Data'''
+    LeftOmega = LeftMotor.WriteVoltage(V['Left Voltage'])
+    RightOmega = RightMotor.WriteVoltage(V['Right Voltage'])
 
-    print("\r" f'Error: {Controller.Error} m\n', end="")
-    print("\r" "=============================\n", end="")
-    time.sleep(SampleTime)
-    i += 1
-    input("Press Enter to Continue.")
+    print(
+            f"[ M O T O R ]\n"
+            f"Left Omega   : {float(LeftOmega):5.2f} rad/s\n"
+            f"Right Omega  : {float(RightOmega):5.2f} rad/s\n"
+            )
+
+    '''Sensor Data'''
+    NoisyLeft = Sensor.AddNoise(LeftOmega)
+    NoisyRight = Sensor.AddNoise(RightOmega)
+
+    print(
+            f"[ S E N S O R ]\n"
+            f"Left Omega   : {float(NoisyLeft):5.2f} rad/s\n"
+            f"Right Omega  : {float(NoisyRight):5.2f} rad/s\n"
+            )
+
+    '''Kinematic Data'''
+    RobotMotion.FindKinematics(NoisyLeft, NoisyRight)
+
+    print(
+            f"[ K I N E M A T I C S ]\n"
+            f"Omega        : {float(RobotMotion.Omega):5.2f} rad/s\n"
+            f"Speed        : {float(m.sqrt(RobotMotion.Vx**2 + RobotMotion.Vy**2)):5.2f} m/s\n"
+            f"Position (y) : {float(RobotMotion.y):5.2f} m\n"
+            f"Orientation  : {float(RobotMotion.Theta):5.2f} rad\n"
+            )
+
+    time.sleep(1)
+    print("===[NEXT ITERATION]===")
+
+    '''Control Data'''
+    V = Controller.FindVoltages(RobotMotion.y, RobotMotion.Theta)
+
+
 
 print(
     f"The robot converged on the set point after:\n"

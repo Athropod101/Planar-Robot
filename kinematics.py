@@ -12,7 +12,7 @@ class Kinematics:
         self.y            = InitialPosition[1].item()
 
         # Post-Init
-        self.KinematicControl: float = (self.WheelRadius*self.SampleTime)**2/self.Differential
+        self.DWR: float = (self.Differential / 2 / self.WheelRadius)
 
     '''
     These methods are not meant to be executed individually but rather executed by the FindPosistion() method.

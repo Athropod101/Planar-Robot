@@ -12,7 +12,7 @@ class Motor:
         self.b: float = self.Torque*self.Resistance/self.MotorConst**2
         self.m: float = 1/self.MotorConst
         self.dV_cap: float = self.MaxVoltage - self.MinVoltage
-        self.MotorControl: dict[float] = {'m': self.m, 'dV_cap': self.dV_cap}
+        self.MotorControl: dict[float] = {'m': self.m, 'V_max': self.MaxVoltage, 'V_min': self.MinVoltage}
 
     def __repr__(self) -> str:
         rep = (
