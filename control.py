@@ -44,6 +44,7 @@ class Control:
     def _SetTheta(self, y_new) -> float:
         self.yError   : float = y_new - self.y_set
         Theta_set: float = m.atan(-self.yError)
+        #Theta_set: float = m.tanh(-self.yError) * m.pi / 2
         self.Theta_set = Theta_set
         if __name__ == "__main__":
             print(
