@@ -1,3 +1,4 @@
+- Note: One of the voltages is free from noise in the plots. This is intended, because the noise-free voltage is actually the voltage that is forced to be the set voltage. 
 # Assumptions
 1. Robot Dynamics already taken into account as part of the input. This assumption simplifies:
     * Defining motor parameters to voltage and angular velocity ranges as well.

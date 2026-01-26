@@ -2,6 +2,7 @@ from sensors import Sensor
 from motor import Motor
 from control import Control
 from kinematics import Kinematics
+from plots import Plot
 import numpy as np
 import time
 import math as m
@@ -24,18 +25,18 @@ RobotData = {
 InitialPosition = {
     'Theta': 0,
     'x'    : 0,
-    'y'    : -2
+    'y'    : -5
     }
 
 SensorData = {
-    'Mean': 0, # rad/s
-    'Dev': 0.0 # percentage
+    'Mean': 20,# rad/s
+    'Dev': 5 # percentage
     }
 
 PIDConstants = {
     'kP': 1,
-    'kI': 2,
-    'kD': 0.00
+    'kI': 1,
+    'kD': 0
     }
 
 SetVoltage = 6
@@ -47,8 +48,6 @@ LeftMotor = Motor(**MotorData)
 RightMotor = Motor(**MotorData)
 
 Sensor = Sensor(**SensorData)
-
-# Controller = Control(LeftMotor.MotorControl, RobotMotion.KinematicControl, SetVoltage, PIDConstants, SetPoint, SampleTime, InitialPosition)
 
 Controller = Control(
         SetPoint,
@@ -64,7 +63,21 @@ i = 0
 y_val = NewPos['y']
 u_val = NewPos['Theta']
 V = Controller.FindVoltages(y_val, u_val)
+
+t         : list[float] = []
+X         : list[float] = []
+Y         : list[float] = []
+U         : list[float] = []
+yE        : list[float] = []
+uE        : list[float] = []
+OMEGA     : list[float] = []
+OMEGALEFT : list[float] = []
+OMEGARIGHT: list[float] = []
+VLEFT     : list[float] = []
+VRIGHT    : list[float] = []
 while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > 0.01:
+    if i > 500:
+        break
 
     '''Motor Data'''
     LeftOmega = LeftMotor.WriteVoltage(V['Left Voltage'])
@@ -77,15 +90,27 @@ while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > 0.01:
     '''Kinematic Data'''
     RobotMotion.FindKinematics(NoisyLeft, NoisyRight)
 
+    '''Logging Data'''
+    t.append(i*SampleTime)
+    X.append(RobotMotion.x)
+    Y.append(RobotMotion.y)
+    U.append(RobotMotion.Theta)
+    yE.append(Controller.yError)
+    uE.append(Controller.ThetaError)
+    OMEGA.append(RobotMotion.Omega * 30 / m.pi)
+    OMEGALEFT.append(NoisyLeft * 30 / m.pi)
+    OMEGARIGHT.append(NoisyRight * 30 / m.pi)
+    VLEFT.append(V['Left Voltage'])
+    VRIGHT.append(V['Right Voltage'])
     '''Setup Next Iteration'''
-    time.sleep(SampleTime)
+    #time.sleep(SampleTime)
     i += 1
 
     '''Control Data'''
     V = Controller.FindVoltages(RobotMotion.y, RobotMotion.Theta)
 
     '''Printing'''
-
+    '''
     print(f"\033[2J\033[H") # Clears the whole print screen!
 
     print(
@@ -118,12 +143,14 @@ while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > 0.01:
             f"Position (y) : {float(RobotMotion.y):5.2f} m\n"
             f"Orientation  : {float(RobotMotion.Theta):5.2f} rad\n"
             )
-
-
-
+    '''
 
 print(
     f"The robot converged on the set point after:\n"
     f"{i} iterations.\n"
     f"{i*SampleTime} seconds. \n"
     )
+
+Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT)
+Plot.Build()
+

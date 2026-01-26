@@ -1,15 +1,18 @@
-import time
+#%matplotlib inline
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('kitcat')
 
-# Print initial lines
-print("Line 1: Loading...")
-print("Line 2: Processing...")
-print("Line 3: Status...")
+fig, ax = plt.subplots(2, 2)
 
-for i in range(11):
-    time.sleep(0.5)
-    
-    # Move up 3 lines and rewrite
-    print("\033[3A", end='')  # Move up 3 lines
-    print(f"\033[KLine 1: Progress {i*10}%")
-    print(f"\033[KLine 2: Items processed: {i}")
-    print(f"\033[KLine 3: Status: {'█' * i}", flush=True)
+# Regular plots
+ax[0, 0].plot([1, 2], [1, 2])
+ax[0, 1].plot([1, 2], [1, 2])
+ax[1, 0].plot([1, 2], [1, 2])
+
+# Text-only subplot
+ax[1, 1].set_axis_off()
+ax[1, 1].text(0.5, 0.5, 'Parameters:\n- param1: value1\n- param2: value2', 
+              ha='center', va='center', fontsize=12)
+
+plt.show()
