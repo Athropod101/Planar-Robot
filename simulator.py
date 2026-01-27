@@ -2,7 +2,7 @@ from sensors import Sensor
 from motor import Motor
 from control import Control
 from kinematics import Kinematics
-from plots2 import Plot
+from plots import Plot
 import numpy as np
 import time
 import math as m
@@ -152,7 +152,6 @@ print(
     )
 
 SetOmega = round(LeftMotor.WriteVoltage(SetVoltage) * 30 / m.pi)
-print(SetOmega)
 Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT)
 Plot.Build()
 
