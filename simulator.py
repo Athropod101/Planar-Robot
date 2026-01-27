@@ -30,12 +30,12 @@ InitialPosition = {
 
 SensorData = {
     'Mean': 0,# rad/s
-    'Dev': 5  # Multiplier
+    'Dev': 0  # Multiplier
     }
 
 PIDConstants = {
-    'kP': 1,
-    'kI': 1,
+    'kP': 0.5,
+    'kI': 5,
     'kD': 0
     }
 
@@ -151,6 +151,8 @@ print(
     f"{i*SampleTime} seconds. \n"
     )
 
-Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint)
+SetOmega = round(LeftMotor.WriteVoltage(SetVoltage) * 30 / m.pi)
+print(SetOmega)
+Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, MotorData['MinVoltage'], SetOmega)
 Plot.Build()
 
