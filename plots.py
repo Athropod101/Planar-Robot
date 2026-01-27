@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.gridspec import GridSpec
 from dataclasses import dataclass
 from math import pi, degrees
@@ -23,13 +24,12 @@ class Plot:
     VRIGHT    : list[float]
 
     # Control
-    SetPoint  : float
-    V_set     : float
+    SetPoint  : float = 0
+    V_set     : float = 6
+    SetOmega  : float = 200*3.14/180
 
     # Motor
-    Vmin      : float
-    SetOmega  : float
-
+    MinVoltage : float = 3
 
     def _BuildAxis(self, Axes, title, ylabel, labels = '', yline = 0, yticks = [0, 1]):
         Axes.axhline(
@@ -49,21 +49,19 @@ class Plot:
         if labels != '':
             Axes.legend(
                     labels, 
-                    bbox_to_anchor = (1, 1),
                     fontsize = 'small',
                     handlelength = 0.1,
                     )
 
     def Build(self):
-        fig = plt.figure(layout = "constrained", figsize = [10, 8])
+        fig = plt.figure(layout = "constrained", figsize = [10, 6])
         fig.suptitle("Robot Graphs")
         
-        gs = GridSpec(4, 3, figure = fig)
+        gs = GridSpec(3, 3, figure = fig)
         Map = fig.add_subplot(gs[0:3, 0:2])
         Err = fig.add_subplot(gs[0, 2])
         Ome = fig.add_subplot(gs[1, 2])
         Vol = fig.add_subplot(gs[2, 2])
-        Tex = fig.add_subplot(gs[3, :])
 
         Map.plot(self.X, self.Y, color = 'black')
         Map.plot(self.X[0], self.Y[0], marker = (3, 0, (degrees(self.U[0]) + 4)), markersize = 15, linestyle = '-', color = 'cyan', mec = 'black')
@@ -115,13 +113,13 @@ class Plot:
                 r'$V_{L}$',
                 r'$V_{R}$'
                 ]
-        VoltTicks = [self.Vmin, self.V_set]
+        VoltTicks = [self.MinVoltage, self.V_set]
         self._BuildAxis(
                         Vol,
                         "Voltage vs Time",
                         "Voltage (V)",
                         VoltLabels,
-                        yline = self.Vmin,
+                        yline = self.MinVoltage,
                         yticks = VoltTicks
                         )
         self._BuildAxis(
@@ -138,52 +136,6 @@ class Plot:
         Map.set_xticks([self.X[0], self.X[-1]])
         Map.set_yticks([self.Y[0], self.SetPoint])
 
-        # Building Text
-        Tex.spines['top'].set_color('None')
-        Tex.spines['bottom'].set_color('None')
-        Tex.spines['left'].set_color('None')
-        Tex.spines['right'].set_color('None')
-        #Tex.set_xticks([])
-        #Tex.set_yticks([])
-        Tex.set_xlim([0, 5])
-        Tex.set_ylim([-1, 1])
-        Da1 = (
-                f"[ Motor ]\n"
-                f"Torque:\n"
-                f"Resistance:\n"
-                f"Constant:\n"
-                f"Min Voltage:\n"
-                f"Max Voltage:\n"
-                f"Slope:\n"
-                f"Offset:\n"
-                )
-        Da2 = (
-                f"[ Wheels ]\n"
-                f"Radius      :\n"
-                f"Differential:\n"
-                f"\n"
-                f"[ Sensors ]\n"
-                f"Noise Mean     :\n"
-                f"Noise Deviation:\n"
-                f"\n"
-                f"[ PID ]\n"
-                f"Proportional:\n"
-                f"Integral    :\n"
-                f"Derivative  :\n"
-                )
-
-        Da3 = (
-                f"[ Initial Position ]\n"
-                f"x: 0.00\n"
-                f"y:\n"
-                f"\u03B8:\n"
-                f"\n"
-                f"[ Control ]\n"
-                f"Sample Time: \n"
-                f"Set Point: \n"
-                f"Set Voltage: \n"
-                )
-        Tex.text(1, 0, Da1)
 
         plt.show()
         plt.savefig('Robot Data.svg')

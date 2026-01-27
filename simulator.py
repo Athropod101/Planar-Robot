@@ -40,7 +40,7 @@ PIDConstants = {
     }
 
 SetVoltage = 6
-SetPoint = 2
+SetPoint = 0
 
 RobotMotion = Kinematics(SampleTime, **RobotData, **InitialPosition)
 
@@ -153,6 +153,6 @@ print(
 
 SetOmega = round(LeftMotor.WriteVoltage(SetVoltage) * 30 / m.pi)
 print(SetOmega)
-Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, MotorData['MinVoltage'], SetOmega)
+Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT)
 Plot.Build()
 
