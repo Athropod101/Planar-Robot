@@ -2,7 +2,7 @@ from sensors import Sensor
 from motor import Motor
 from control import Control
 from kinematics import Kinematics
-from plots import Plot
+from plots2 import Plot
 import numpy as np
 import time
 import math as m
