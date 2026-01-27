@@ -29,8 +29,8 @@ InitialPosition = {
     }
 
 SensorData = {
-    'Mean': 20,# rad/s
-    'Dev': 5 # percentage
+    'Mean': 0,# rad/s
+    'Dev': 5  # Multiplier
     }
 
 PIDConstants = {
@@ -40,7 +40,7 @@ PIDConstants = {
     }
 
 SetVoltage = 6
-SetPoint = 0
+SetPoint = 2
 
 RobotMotion = Kinematics(SampleTime, **RobotData, **InitialPosition)
 
@@ -151,6 +151,6 @@ print(
     f"{i*SampleTime} seconds. \n"
     )
 
-Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT)
+Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint)
 Plot.Build()
 

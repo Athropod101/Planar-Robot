@@ -20,7 +20,11 @@ class Plot:
     VLEFT     : list[float]
     VRIGHT    : list[float]
 
-    def _BuildAxis(self, Axes, title, ylabel):
+    # Control
+    SetPoint  : float
+
+
+    def _BuildAxis(self, Axes, title, ylabel, labels = ''):
         Y = 0 if ylabel != "Voltage (V)" else 3
         Axes.axhline(
                 y = Y,
@@ -33,6 +37,14 @@ class Plot:
         Axes.set_title(title)
         Axes.grid(True)
         Axes.margins(x = 0, y = 0.1)
+        #Axes.legend(labels) 
+        if labels != '':
+            Axes.legend(
+                    labels, 
+                    bbox_to_anchor = (1, 1),
+                    fontsize = 'small',
+                    handlelength = 0.1,
+                    )
 
     def Build(self):
         fig = plt.figure(layout = "constrained")
@@ -62,16 +74,51 @@ class Plot:
                 )
 
         # Building the Axes
-        self._BuildAxis(Err, "Errors vs Time", "Error")
-        self._BuildAxis(Ome, "Angular Velocities vs Time", "Angular Velocity (rpm)")
-        self._BuildAxis(Vol, "Voltage vs Time", "Voltage (V)")
-        self._BuildAxis(Map, "Robot Position", "y-Position (m)")
+        ErrorLabels = [
+                '$y_{E}$\n(m)',
+                '$\\theta_{E}$\n(rad)'
+                ]
+        self._BuildAxis(
+                        Err, 
+                        "Errors vs Time",
+                        "Error",
+                        ErrorLabels
+                        )
+
+        OmegaLabels = [
+                r'$\omega$',
+                r'$\omega_{L}$',
+                r'$\omega_{R}$'
+                ]
+        self._BuildAxis(
+                        Ome,
+                        "Angular Velocities vs Time",
+                        "Angular Velocity (rpm)",
+                        OmegaLabels
+                        )
+
+        VoltLabels = [
+                r'$V_{L}$',
+                r'$V_{R}$'
+                ]
+        self._BuildAxis(
+                        Vol,
+                        "Voltage vs Time",
+                        "Voltage (V)",
+                        VoltLabels
+                        )
+        self._BuildAxis(
+                        Map,
+                        "Robot Position",
+                        "y-Position (m)",
+                        )
 
         # Building Map
         Map.set_xlabel("x-Position (m)")
         Map.grid(False)
         Map.margins(x = 0.05)
         Map.set_xticks([self.X[0], self.X[-1]])
+        Map.set_yticks([self.Y[0], self.SetPoint])
 
         plt.show()
         plt.savefig('Robot Data.png')
