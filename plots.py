@@ -4,6 +4,7 @@ import matplotlib.animation as ani
 from dataclasses import dataclass
 import numpy as np
 from math import degrees
+from data_structures import Pose
 
 import matplotlib
 matplotlib.use('kitcat')
@@ -174,7 +175,6 @@ class Plot:
                 color = 'cyan',
                 mec = 'black')
 
-        
         ydata = (
                 None,
                 None,
@@ -190,7 +190,21 @@ class Plot:
                 self.Lines[i].set_ydata(ydata[i])
                 self.Lines[i].set_xdata(self.t[:frame])
 
+        NewPose = Pose(self.U[frame], self.x[frame], self.y[frame])
+        self.Pose.set_text(NewPose.__repr__())
 
+    def _PoseText(self, Ax):
+        PoseArray = Pose(self.U[0], self.x[0], self.y[0])
+        self.Pose = Ax[0].text(
+                x = 0.975,
+                y = 0.5,
+                s = PoseArray.__repr__(),
+                transform = Ax[0].transAxes,
+                ha = 'right',
+                va = 'center',
+                )
+
+        
 
     def Build(self):
         self._BuildFig()
@@ -203,6 +217,7 @@ class Plot:
         self._SetAxTitles(self.Ax)
         self._SetLegends(self.Ax)
         self._SetMargins(self.Ax)
+        self._PoseText(self.Ax)
 
         anim = ani.FuncAnimation(
                 fig = self.fig,
