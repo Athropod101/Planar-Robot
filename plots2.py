@@ -18,7 +18,6 @@ class Plot:
     U         : list[float]
     yE        : list[float]
     uE        : list[float]
-    OMEGA     : list[float]
     OMEGALEFT : list[float]
     OMEGARIGHT: list[float]
     VLEFT     : list[float]

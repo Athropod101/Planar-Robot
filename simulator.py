@@ -25,7 +25,7 @@ RobotData = {
 InitialPosition = {
     'Theta': 0,
     'x'    : 0,
-    'y'    : -5
+    'y'    : 5
     }
 
 SensorData = {
@@ -35,7 +35,7 @@ SensorData = {
 
 PIDConstants = {
     'kP': 0.5,
-    'kI': 5,
+    'kI': 2,
     'kD': 0
     }
 
