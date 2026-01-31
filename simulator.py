@@ -25,12 +25,12 @@ RobotData = {
 InitialPosition = {
     'Theta': 0,
     'x'    : 0,
-    'y'    : 5
+    'y'    : 2
     }
 
 SensorData = {
     'Mean': 0,# rad/s
-    'Dev': 0  # Multiplier
+    'Dev': 5  # Multiplier
     }
 
 PIDConstants = {
@@ -151,7 +151,7 @@ print(
     f"{i*SampleTime} seconds. \n"
     )
 
-SetOmega = round(LeftMotor.WriteVoltage(SetVoltage) * 30 / m.pi)
-Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT)
+SetOmega = LeftMotor.WriteVoltage(SetVoltage, rpm = True)
+Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, SetOmega, LeftMotor.MinVoltage)
 Plot.Build()
 

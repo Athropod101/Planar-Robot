@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import pi
 
 @dataclass
 class Motor:
@@ -23,9 +24,11 @@ class Motor:
                 )
         return rep
 
-    def WriteVoltage(self, Voltage: float) -> float:
+    def WriteVoltage(self, Voltage: float, rpm = False) -> float:
         V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage
         Omega = (V*self.m - self.b) if Voltage >= self.MinVoltage else self.MinVoltage
+        if rpm == True:
+            Omega *= 30 / pi
         return Omega
 
 '''Testing'''

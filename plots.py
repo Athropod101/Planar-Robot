@@ -226,4 +226,4 @@ class Plot:
                 )
 
         plt.show()
-        anim.save('Test.gif', writer = 'pillow')
+        anim.save('GIFs/Plot.gif', writer = 'pillow')

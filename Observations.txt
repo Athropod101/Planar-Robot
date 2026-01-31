@@ -1,0 +1,1 @@
+For Saturation Case (No Noise, Low Y-Error) case, matplotlib crashed out because Yinit was the same as Yset, so it switched to dinamic graph plotting. THIS MEANS THAT IT CAN BE DONE AND YOU SHOULD FIGURE OUT HOW TO DO IT!!!
