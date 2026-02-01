@@ -42,6 +42,11 @@ PIDConstants = {
 SetVoltage = 6
 SetPoint = 0
 
+Tolerance = 0.01
+MaxIter = 500
+
+''' USER EDITING NOT INTENDED BELOW THIS LINE'''
+
 RobotMotion = Kinematics(SampleTime, **RobotData, **InitialPosition)
 
 LeftMotor = Motor(**MotorData)
@@ -75,8 +80,8 @@ OMEGALEFT : list[float] = []
 OMEGARIGHT: list[float] = []
 VLEFT     : list[float] = []
 VRIGHT    : list[float] = []
-while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > 0.01:
-    if i > 500:
+while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
+    if i > MaxIter:
         break
 
     '''Motor Data'''
