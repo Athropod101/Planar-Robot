@@ -77,8 +77,11 @@ For the record, I think MatLab is *really* cool--way cooler than the Godless lan
 Regarding the structure of the project, I'd heavily appreciate suggestions on how to improve my code. I'll say that I've gotten a lot better since version 0 thanks to a Heat Transfer 2 project that I decided to write Python code for. I've noticed Python has a lot of syntax conventions as well as libraries meant to help write more structured code. 
 
 # Future Plans
-This is a project I'd like to iterate future versions for. Now that I know how to go about it, I should be able to improve it way more quickly than I built it at first. First and foremost I'd like to implement my newfound knowledge from my Heat Transfer project to better structure this project (especially data_structures; that module is honestly kinda useless here..) As a sneak peak, my Robotics 1 final will be this same exam, but built with ROS2, so that'll naturally be implemented here.
+This is a project I'd like to iterate future versions for. Now that I know how to go about it, I should be able to improve it way more quickly than I built it at first. First and foremost I'd like to implement my newfound knowledge from my Heat Transfer project to better structure this project
+(especially data_structures; that module is kinda useless in its current state and not a good example of a communication protocol.)
+As a sneak peak, my Robotics 1 final will be this same exam, but built with ROS2, so that'll naturally be implemented here.
 
 Regarding visualization, I'm actually quite unhappy with how the plots turned out. I'd originally wanted to try a Manim animation, but time constraints led me back to Matplotlib due to its familiarity with MatLab's plotting (Matplotlib is super cool btw, unlike Numpy. It has really good documentation too.) I originally wanted to include a text display of the robot's specs and dynamically-changing data. Displaying this text in a pretty way turned out to be way too frustrating to pursue, so I settled for just the SE(2) pose slapped on top of the map. 
+Additionally, the plotting structure is currently bugged for negative errors, so that needs to be fixed.
 
 As for the biggest hope for this project, I'd like to write it in Julia. Maybe not all of it; perhaps some pieces of it are better suited for Python. However, I want to run all the math of this with Julia in order to learn that language. I just..genuinely abhor doing math in Python. It's clearly not built for it, and Numpy feels more like a bandaid than anything. I crave the seamlessness of MatLab math.
