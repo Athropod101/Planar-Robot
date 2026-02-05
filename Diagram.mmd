@@ -1,0 +1,16 @@
+---
+title: Planar Robot Block Diagram
+---
+flowchart LR
+    START:::hidden -- "y Set Point" -->  ySum(($$\Sigma$$));
+    ySum -- "Position Error" --> uFind["tanh(-y)"];
+    uFind -- "$$\theta \quad$$ Set Point" --> uSum(($$\Sigma$$));
+    uSum -- "$$\theta \quad$$ Error" --> PID[PID];
+    PID --> VFind[Voltage <br> Finder];
+    VFind --> Motor[Motors];
+    Motor --> Plant[Plant];
+    Plant -- "Motion" --> M:::hidden
+    Plant --> uSen[$$\theta \quad$$ Sensor];
+    uSen --> uSum;
+    Plant --> ySen[y Sensor];
+    ySen --> ySum;

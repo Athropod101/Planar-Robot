@@ -1,5 +1,5 @@
 # Introduction
-This repository contains the program files for a simple differential robot control simulator for an exam for the Polytechnic University of Puerto Rico's Automated Systems and Robotics 1 (ME-3082) course. This README contains usage instructions and an overview of the exam; greater detail can be found in [the repository's Report file](Report.md).
+This repository contains the program files for a simple differential robot control simulator for an exam for the Polytechnic University of Puerto Rico's Automated Systems and Robotics 1 (ME-3082) course. This README contains usage instructions and an overview of the exam; greater detail can be found in [the repository's Report file](Report.html).
 
 ## Purpose
 The purpose of this repository is to demonstrate the student's competence in several fields of the Mechanical Engineering bachelor's Robotics and Industrial Automation specialization, such as:
@@ -47,7 +47,7 @@ Once the user has entered their desired parameters, they may run [simulator.py](
 ## Plots
 [simulator.py](simulator.py) will generate an animation of the simulation and save it as [Plots.gif](GIFs/Plots.gif) in the [GIFs](GIFs/) directory. The animation contains plots of the robot's x-y trajectory, its y- and $\theta$-errors, its wheel angular velocities, and its motor voltages. 
 
-Additionally, some other simulation results are saved in the same directory. Details are found in the [Report](Report.md).
+Additionally, some other simulation results are saved in the same directory. Details are found in the [Report](Report.html).
 
 # Assumptions
 1. Motor torque is constant.

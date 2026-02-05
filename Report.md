@@ -1,7 +1,3 @@
----
-header-includes:
-    - \usepackage{mathtools}
----
 <style>
 body {
     text-align: justify;
@@ -526,8 +522,10 @@ however, they will be pursued for future versions.
 <div style="page-break-after: always;"></div>
 
 # References
+<div style="text-align: left;">
 [1] "DC Motor Speed: Voltage and Torque Relationships," Precision Microdrives. [Online]. Available: https://www.precisionmicrodrives.com/dc-motor-speed-voltage-and-torque-relationships.
 
 [2] "Matplotlib documentation," Matplotlib Development Team. [Online]. Available: https://matplotlib.org/stable/index.html. [Accessed: Feb. 5, 2026].
 
 [3] "Understanding PID Control," YouTube. [Online]. Available: https://www.youtube.com/watch?v=wkfEZmsQqiA&list=PLn8PRpmsu08pQBgjxYFXSsODEF3Jqmm-y. [Accessed: Feb. 5, 2026].
+</div>
