@@ -1,58 +1,84 @@
-from dataclasses import dataclass, field
+'''
+data_structures.py is responsible for setting up the data objects that will be configured in simulator.py and later passed to the other modules during instantiation. 
+
+Each class is structured such that it takes in arguments with human-readable names, but each attribute is given a mathematical mnemonic after initialization.
+
+Furthermore, default values are given in this module to make isolated module-testing consistent. 
+'''
+from dataclasses import dataclass
 import numpy as np
-np.set_printoptions(formatter={'float': '{:.4f}'.format})
-import math as m
-from typing import TypedDict
+from numpy import sin, cos
+from typing import Literal
 
-SampleTime: float
-
-class MotorData(TypedDict):
-    Torque: float
-    Resistance: float
-    MotorConst: float
-    MaxVoltage: float
-    MinVoltage: float
-
-class RobotData(TypedDict):
-    WheelRadius: float
-    Differential: float
-
-class SensorData(TypedDict):
-    NoiseMean: float
-    NoiseDev: float
-
-class PIDConstants(TypedDict):
-    kP: float
-    kI: float
-    kD: float
-
-class PositionVector:
-    def __init__(self, Theta, x, y):
-        self.PositionVector = np.array([[Theta], [x], [y]])
-
-    def __repr__(self):
-        return f"{self.PositionVector}"
-
-# Pose Type
 @dataclass
-class Pose:
-    Theta:  float = 0
-    x:      float = 0
-    y:      float = 0
+class MotorData:
+    Torque          : float = 0.1500 # Nm
+    Resistance      : float = 0.9470 # Ω
+    MotorConstant   : float = 0.2604 # V/rad
+    Max_Voltage     : float = 6.0000 # V
+    Min_Voltage     : float = 3.0000 # V
 
     def __post_init__(self):
+        self.T      = self.Torque
+        self.R      = self.Resistance
+        self.k      = self.MotorConstant
+        self.V_max  = self.Max_Voltage
+        self.V_min  = self.Min_Voltage
+
+@dataclass
+class GeometricData:
+    Wheel_Radius: float = 0.02 # m
+    Differential: float = 0.10 # m
+
+    def __post_init__(self):
+        self.r = self.Wheel_Radius
+        self.L = self.Differential
+
+@dataclass
+class SensorData:
+    Mean                : float = 0 # rad/s
+    Deviation_Multiplier: float = 0 #
+
+    def __post_init__(self):
+        self.μ      = self.Mean
+        self.σ_mult = self.Deviation_Multiplier
+
+@dataclass
+class ControllerData:
+    Set_Point               : float = 0 # m
+    Set_Voltage             : float = 6 # V
+    Proportional_Constant   : Literal["Default"] | float = "Default"
+
+@dataclass
+class SimulationData:
+    Sample_Time     : float = 0.001 # s
+    Max_Iterations  : int   = 1e5   #
+    Tolerance       : float = 0.001 #
+
+    def __post_init__(self):
+        self.δt     = self.Sample_Time
+        self.i      = self.Max_Iterations
+        self.TOL    = self.Tolerance
+
+@dataclass
+class Position:
+    θ: float = 0 # rad
+    x: float = 0 # m
+    y: float = 0 # m
+
+    def __post_init__(self):
+        self.Vector = np.array([
+            [self.θ],
+            [self.x],
+            [self.y]
+            ])
         self.Pose = np.array([
-            [m.cos(self.Theta), -m.sin(self.Theta), self.x],
-            [m.sin(self.Theta),  m.cos(self.Theta), self.y],
-            [0,                  0,                 1     ]
+            [cos(self.θ), -sin(self.θ), self.x],
+            [sin(self.θ),  cos(self.θ), self.y],
+            [0,            0,           1     ]
             ])
 
-    def __repr__(self):
-        return f"{self.Pose}"
-
 def main() -> None:
-    TransformTest = Pose(m.pi/4, 0, 5)
-    print(TransformTest)
 
 if __name__ == "__main__":
     main()
