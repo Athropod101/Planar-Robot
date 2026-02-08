@@ -54,10 +54,10 @@ class Control:
 
     def _PIDTune(self, Theta_set, Theta_new) -> float:
         ThetaError_new: float  = Theta_new - Theta_set
-        PError        : float  = self.kP * ThetaError_new
+        self.PError        : float  = self.kP * ThetaError_new
         self.IError           += self.kI * ThetaError_new * self.dt
-        DError        : float  = self.kD * (ThetaError_new - self.ThetaError) / self.dt
-        TunedError    : float  = PError + self.IError + DError
+        self.DError        : float  = self.kD * (ThetaError_new - self.ThetaError) / self.dt
+        self.TunedError    : float  = self.PError + self.IError + self.DError
         self.ThetaError = ThetaError_new
         if __name__ == "__main__":
             print(
@@ -67,7 +67,7 @@ class Control:
                     f"Derivative Error  : {float(DError):5.2f} rad\n"
                     f"Tuned Error       : {float(TunedError):5.2f} rad"
                     )
-        return TunedError
+        return self.TunedError
 
     def _FindAlpha(self, TunedError) -> float:
         beta : float = self.beta

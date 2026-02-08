@@ -7,9 +7,9 @@ class ErrorPlots:
     y: list[float] = field(default_factory = lambda: [0, 0.5])
     theta: list[float] = field(default_factory = lambda: [-0.5, 0])
     y_Error: dict[str, float] = field(default_factory = lambda:
-            {"Net": [-0.75, 0], "P": [-1, 0], "I": [-0.5, 0], "D": [.75, 0]})
+            {"Net": [-0.5, 0.5], "PID": [-0.75, 0], "P": [-1, 0], "I": [-0.5, 0], "D": [.75, 0]})
     theta_Error: dict[str, float] = field(default_factory = lambda:
-            {"Net": [-0.75, 0], "P": [-1, 0], "I": [-0.5, 0], "D": [.75, 0]})
+            {"Net": [-0.5, 0.5], "PID": [-0.75, 0], "P": [-1, 0], "I": [-0.5, 0], "D": [.75, 0]})
     y_set: float = 0
     theta_set: list[float] = field(default_factory = lambda: [0, 0.5])
 
@@ -22,8 +22,8 @@ class ErrorPlots:
                 ]
         suptitle = "Errors vs Time"
         color = ["Yellow", "Cyan"]
-        errorcolor = ["Red", "Orange", "Brown", "Purple"]
-        legend = ["Net Error", "Proportional Error", "Integral Error", "Derivative Error"]
+        errorcolor = ["Red", "Blue", "Orange", "Brown", "Purple"]
+        legend = ["Net Error", "PID Error", "Proportional Error", "Integral Error", "Derivative Error"]
             
         self._BuildSubplot(suptitle)
         self._BuildAxes(ylabels)
@@ -31,6 +31,7 @@ class ErrorPlots:
         self._BuildPoseLines(color)
         self._BuildErrorLines(errorcolor)
         self._BuildErrorLegends(legend)
+        plt.show()
 
     def _BuildSubplot(self, suptitle) -> None:
         self.fig, self.ax = plt.subplots(
@@ -58,8 +59,8 @@ class ErrorPlots:
 
     def _BuildErrorLines(self, errorcolor) -> None:
         Error = [self.y_Error, self.theta_Error]
-        self.ErrorPlot = [[None] * 4,
-                     [None] * 4]
+        self.ErrorPlot = [[None] * 5,
+                     [None] * 5]
         for i in range(2):
             for j, k in enumerate(Error[i].keys()):
                 self.ErrorPlot[i][j], = self.ax[i + 2].plot(

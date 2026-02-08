@@ -351,8 +351,8 @@ By using the orientation error in the robot-omega-and-wheel-omegas relation, the
 
 $$
 \omega = \frac{\theta_{Err}}{\delta t} = \frac{2r}{L}(\omega_{Set} - \omega_{New}); \quad \omega_{Set} = mV_{set} - b; \quad \omega_{New} = m(V_{Set} - \alpha V_{Cap}) - b)\\
-\omega = \frac{2r}{L}(\alpha V_{Cap})\\
-\alpha = \frac{L}{2rV_{Cap}} \frac{\theta_{Err}}{\delta t}=\beta \theta_{Err}
+\omega = \frac{2r}{L}(\alpha mV_{Cap})\\
+\alpha = \frac{L}{2rmV_{Cap}} \frac{\theta_{Err}}{\delta t}=\beta \theta_{Err}
 $$
 
 These new voltages can then be passed to the motor for the next iteration.

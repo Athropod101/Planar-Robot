@@ -7,6 +7,7 @@ import numpy as np
 import time
 import math as m
 from ErrorPlots import ErrorPlots
+import matplotlib.pyplot as plt
 
 SampleTime = 0.1
 
@@ -26,17 +27,17 @@ RobotData = {
 InitialPosition = {
     'Theta': 0,
     'x'    : 0,
-    'y'    : 2
+    'y'    : 0.5
     }
 
 SensorData = {
     'Mean': 0,# rad/s
-    'Dev': 5  # Multiplier
+    'Dev': 0  # Multiplier
     }
 
 PIDConstants = {
-    'kP': 0.5,
-    'kI': 2,
+    'kP': 1,
+    'kI': 0,
     'kD': 0
     }
 
@@ -81,6 +82,12 @@ OMEGALEFT : list[float] = []
 OMEGARIGHT: list[float] = []
 VLEFT     : list[float] = []
 VRIGHT    : list[float] = []
+
+uEPID     : list[float] = []
+uEP       : list[float] = []
+uEI       : list[float] = []
+uED       : list[float] = []
+theta_set : list[float] = []
 while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
     if i > MaxIter:
         break
@@ -110,6 +117,11 @@ while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
     VRIGHT.append(V['Right Voltage'])
 
     '''Logging ErrorPlot Data'''
+    uEPID.append(Controller.TunedError)
+    uEP.append(Controller.PError)
+    uEI.append(Controller.IError)
+    uED.append(Controller.DError)
+    theta_set.append(Controller.Theta_set)
 
 
     '''Setup Next Iteration'''
@@ -165,13 +177,31 @@ SetOmega = LeftMotor.WriteVoltage(SetVoltage, rpm = True)
 #Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, SetOmega, LeftMotor.MinVoltage)
 #Plot.Build()
 
-ErrorPlot = ErrorPlot(
+y_Error = {
+        "Net": yE,
+        "PID": yE,
+        "P"  : yE,
+        "I"  : yE,
+        "D"  : yE,
+        }
+
+theta_Error = {
+        "Net": uE,
+        "PID": uEPID,
+        "P"  : uEP,
+        "I"  : uEI,
+        "D"  : uED,
+        }
+
+ErrorPlot = ErrorPlots(
         Time = t,
         y = Y,
         theta = U,
-        y_Error = ,
-        theta_Error = ,
+        y_Error = y_Error,
+        theta_Error = theta_Error,
         y_set = SetPoint,
-        theta_set = ,
+        theta_set = theta_set,
         )
 plt.show()
+import matplotlib
+print(matplotlib.get_backend())

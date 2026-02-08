@@ -7,7 +7,7 @@ from math import degrees
 from data_structures import Pose
 
 import matplotlib
-matplotlib.use('kitcat')
+#matplotlib.use('kitcat')
 
 @dataclass
 class Plot:
