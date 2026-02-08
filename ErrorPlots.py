@@ -31,7 +31,6 @@ class ErrorPlots:
         self._BuildPoseLines(color)
         self._BuildErrorLines(errorcolor)
         self._BuildErrorLegends(legend)
-        plt.show()
 
     def _BuildSubplot(self, suptitle) -> None:
         self.fig, self.ax = plt.subplots(

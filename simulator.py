@@ -8,8 +8,10 @@ import time
 import math as m
 from ErrorPlots import ErrorPlots
 import matplotlib.pyplot as plt
+import matplotlib
+print(matplotlib.get_backend())
 
-SampleTime = 0.1
+SampleTime = 0.001
 
 MotorData = {
     'Torque'    : 0.15,     # Nm
@@ -27,7 +29,7 @@ RobotData = {
 InitialPosition = {
     'Theta': 0,
     'x'    : 0,
-    'y'    : 0.5
+    'y'    : 5
     }
 
 SensorData = {
@@ -45,7 +47,7 @@ SetVoltage = 6
 SetPoint = 0
 
 Tolerance = 0.01
-MaxIter = 500
+MaxIter = 1e6
 
 ''' USER EDITING NOT INTENDED BELOW THIS LINE'''
 
