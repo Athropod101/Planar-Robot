@@ -6,6 +6,7 @@ from plots import Plot
 import numpy as np
 import time
 import math as m
+from ErrorPlots import ErrorPlots
 
 SampleTime = 0.1
 
@@ -107,6 +108,10 @@ while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
     OMEGARIGHT.append(NoisyRight * 30 / m.pi)
     VLEFT.append(V['Left Voltage'])
     VRIGHT.append(V['Right Voltage'])
+
+    '''Logging ErrorPlot Data'''
+
+
     '''Setup Next Iteration'''
     #time.sleep(SampleTime)
     i += 1
@@ -157,6 +162,16 @@ print(
     )
 
 SetOmega = LeftMotor.WriteVoltage(SetVoltage, rpm = True)
-Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, SetOmega, LeftMotor.MinVoltage)
-Plot.Build()
+#Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, SetOmega, LeftMotor.MinVoltage)
+#Plot.Build()
 
+ErrorPlot = ErrorPlot(
+        Time = t,
+        y = Y,
+        theta = U,
+        y_Error = ,
+        theta_Error = ,
+        y_set = SetPoint,
+        theta_set = ,
+        )
+plt.show()
