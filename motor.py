@@ -1,55 +1,58 @@
-from dataclasses import dataclass
-from math import pi
+from dataclasses import dataclass, field
+from math import pi as π
+from data_structures import MotorData
+
+class VoltageOverload(Exception):
+    pass
 
 @dataclass
 class Motor:
-    Torque     : float # Nm
-    Resistance : float # Ohm
-    MotorConst : float # Vs/rad
-    MaxVoltage : float # V
-    MinVoltage : float # V
+    Data: MotorData = field(default_factory = lambda: MotorData())
 
     def __post_init__(self):
-        self.b: float = self.Torque*self.Resistance/self.MotorConst**2
-        self.m: float = 1/self.MotorConst
-        self.dV_cap: float = self.MaxVoltage - self.MinVoltage
-        self.MotorControl: dict[float] = {'m': self.m, 'V_max': self.MaxVoltage, 'V_min': self.MinVoltage}
+        self.Data.b: float = self.Data.T *self.Data.R / self.Data.k ** 2
+        self.Data.m: float = 1 / self.Data.k
 
-    def __repr__(self) -> str:
-        rep = (
-                f"Slope      : {self.m:.4f} rad/Vs\n"
-                f"Offset     : {self.b:.4f} rad/s\n"
-                f"Max Voltage: {float(self.MaxVoltage):.4f} V\n"
-                f"Min Voltage: {float(self.MinVoltage):.4f} V\n"
-                )
-        return rep
+    def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> dict[float]:
+        b = self.Data.b
+        m = self.Data.m
+        V = [Voltages["Left"], Voltages["Right"]]
+        V_max = self.Data.V_max
+        V_min = self.Data.V_min
+        CONV = 30 / π if rpm == True else 1
 
-    def WriteVoltage(self, Voltage: float, rpm = False) -> float:
-        V = Voltage if Voltage <= self.MaxVoltage else self.MaxVoltage
-        Omega = (V*self.m - self.b) if Voltage >= self.MinVoltage else self.MinVoltage
-        if rpm == True:
-            Omega *= 30 / pi
-        return Omega
+        for i, null in enumerate(V):
+            V[i] = V[i] if V[i] >= V_min else b / m
+
+        if max(V) > self.Data.V_max:
+            raise VoltageOverload(
+                    f"\nWARNING!!! Written voltage greater than maximum allowable motor voltage!\n\n"
+                    f"Motor has been damaged. Shutting down simulation..."
+                    )
+
+        ω = list(map(lambda v: (m * v - b) * CONV, V))
+
+        return dict(zip(["Left", "Right"], ω))
+
 
 '''Testing'''
 def main() -> None:
-    MotorData = {
-            'Torque'    : 0.15,     # Nm
-            'Resistance': 0.9470,# Ohm
-            'MotorConst': 0.2604, # Vs/rad
-            'MaxVoltage': 6,        # V
-            'MinVoltage': 3         # V
-            }
+    TestMotor = Motor()
+    print(TestMotor)
 
-    MotorTest = Motor(**MotorData)
+    def Display(Vl, Vr, RPM = False) -> None:
+        ω = {k: round(v, 2) for k, v in TestMotor.WriteVoltage({"Left": Vl, "Right": Vr}, RPM).items()}
+        print(ω)
 
-    print(MotorTest)
-    print(f"{int(MotorTest.WriteVoltage(0)*30/3.14):3d} rpm")
-    print(f"{int(MotorTest.WriteVoltage(2)*30/3.14):3d} rpm")
-    print(f"{int(MotorTest.WriteVoltage(3)*30/3.14):3d} rpm")
-    print(f"{int(MotorTest.WriteVoltage(5)*30/3.14):3d} rpm")
-    print(f"{int(MotorTest.WriteVoltage(6)*30/3.14):3d} rpm")
-    print(f"{int(MotorTest.WriteVoltage(7)*30/3.14):3d} rpm")
+    print("\nTesting Write Voltage:")
+    Display(5, 5)
+    print("\nTesting Below Minimum Voltage:")
+    Display(2, 3)
+    Display(3, 2)
+    print("\nTesting RPM:")
+    Display(5, 5, True)
+    print("\nTesting Above Maximum Voltage:")
+    Display(7, 3)
 
 if __name__ == "__main__":
     main()
