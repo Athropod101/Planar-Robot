@@ -67,7 +67,7 @@ class Motor:
             self.System.T_p = T_p
             self.System.pOV = pOV
 
-        self.SystemPlot = _SystemPlot(self.System)
+        self.SystemPlot = _SystemPlot(self.System, self.Data)
 
     def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> dict[float]:
         k = self.Data.k
@@ -132,18 +132,23 @@ class Motor:
 @dataclass
 class _SystemPlot:
     System: _SystemData
+    Data: MotorData
 
     def __post_init__(self):
         fig, ax = self._BuildFigure()
         self._BuildAxes(ax)
         self._BuildResponse(ax[0], self.System.t, self.System.ω_t, self.System.T_s, self.System.T_p, -self.System.AinvB[1, 0])
         self._BuildPoles(ax[1], self.System.σ_d, self.System.ω_d)
+        self._BuildTable(ax[2], self.System, self.Data)
         plt.show()
 
     def _BuildFigure(self):
-        fig, ax = plt.subplots(1, 2, layout = "constrained")
+        fig, ax = plt.subplot_mosaic(
+                [['Response', 'Poles'], ['Table', 'Table']],
+                layout = "constrained"
+                )
+        ax = list(ax.values())
         fig.suptitle("DC Motor System Data")
-
         return fig, ax
 
     def _BuildAxes(self, ax):
@@ -212,7 +217,6 @@ class _SystemPlot:
 
         ax.grid(True)
 
-
     def _BuildPoles(self, ax, σ_d, ω_d):
         nbins = 8
         ω_d = abs(ω_d)
@@ -279,6 +283,44 @@ class _SystemPlot:
                 textcoords = 'offset points',
                 fontweight = 'bold'
                 )
+
+    def _BuildTable(self, ax, System, Data):
+        for i, spine in enumerate(ax.spines.keys()):
+            ax.spines[spine].set_visible(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        colLabels = ["Datum", "Symbol", "Value", "Unit"] * 2
+        DataText = [["Damping Constant", "Inertia", "Motor Constant", "Resistance", "Inductance", "Minimum Voltage", "Maximum Voltage"],
+                    ["D", "J", "k", "R", "L", r"$\mathregular{V_{min}}$", r"$\mathregular{V_{max}}$"],
+                    [f"{self.Data.D:.4f}", f"{self.Data.J:.4f}", f"{self.Data.k:.4f}", f"{self.Data.R:.4f}", f"{self.Data.L:.4f}", f"{self.Data.V_min:.4f}", f"{self.Data.V_max:.4f}"],
+                    [r"$\mathregular{kgm^2/s}$", r"$\mathregular{kgm^2}$", r"$\mathregular{Vs}$", "Ω", "Ωs", "V", "V"],
+                    ]
+
+        if System.Underdamped: 
+            SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{int(self.System.ω_d)}"]
+            T_p = f"{int(self.System.T_p * 1e6)}"
+            pOV = f"{self.System.pOV:.4f}"
+        else:
+            SecondFreq = ["Exponential Frequency", r"$\mathregular{σ_d}$", f"{int(self.System.σ_d[1])}"]
+            T_p = "N/A"
+            pOV = "0.0000"
+        SystemText = [["Exponential Frequency", SecondFreq[0], "Natural Frequency", "Damping Ratio", "Settling Time", "Peak Time", "Overshoot"],
+                      [r"$\mathregular{σ_d}$", SecondFreq[1], r"$\mathregular{ω_n}$", "ζ", r"$\mathregular{T_s}$", r"$\mathregular{T_p}$", "%OV"],
+                      [f"{int(self.System.σ_d[0])}", SecondFreq[2], f"{int(self.System.ω_n)}", f"{self.System.ζ:.4f}", f"{int(self.System.T_s * 1e6)}", T_p, pOV],
+                      ["Hz", "Hz", "Hz", "", "μs", "μs", "%"]]
+
+        cellText = DataText + SystemText
+        cellText = list(map(list, zip(*cellText)))
+
+        cellColors = [['lightgray'] * 8, ['w'] * 8]
+        for i in range(3): cellColors = cellColors + [['lightgray'] * 8, ['w'] * 8]
+        cellColors.pop()
+
+        Table = ax.table(cellText = cellText, cellColours = cellColors, colLabels = colLabels, loc = 'center', cellLoc = 'center', colColours = ['#6dd0ee'] * 8)
+        Table.auto_set_font_size(False)
+        Table.set_fontsize(10)
+        Table.auto_set_column_width(range(8))
 
 '''Testing'''
 def main() -> None:
