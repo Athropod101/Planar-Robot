@@ -9,7 +9,6 @@ import math as m
 from ErrorPlots import ErrorPlots
 import matplotlib.pyplot as plt
 import matplotlib
-print(matplotlib.get_backend())
 
 SampleTime = 0.001
 

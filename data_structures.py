@@ -12,27 +12,35 @@ from typing import Literal
 
 @dataclass
 class MotorData:
-    Torque          : float = 0.1500 # Nm
+    Eq_Viscosity    : float = 1.0000 # kgm2/s
+    Inertia         : float = 0.0010 # kgm2
+    Motor_Constant  : float = 1.4604 # V/rad
     Resistance      : float = 0.9470 # Ω
-    MotorConstant   : float = 0.2604 # V/rad
+    Inductance      : float = 0.0020 # Ωs
     Max_Voltage     : float = 6.0000 # V
     Min_Voltage     : float = 3.0000 # V
 
     def __post_init__(self):
-        self.T      = self.Torque
+        self.D      = self.Eq_Viscosity
+        self.J      = self.Inertia
+        self.k      = self.Motor_Constant
         self.R      = self.Resistance
-        self.k      = self.MotorConstant
+        self.L      = self.Inductance
         self.V_max  = self.Max_Voltage
         self.V_min  = self.Min_Voltage
 
 @dataclass
-class GeometricData:
+class BodyData:
     Wheel_Radius: float = 0.02 # m
     Differential: float = 0.10 # m
+    Inertia     : float = 0.20 # kgm2
+    Mass        : float = 0.50 # kg
 
     def __post_init__(self):
         self.r = self.Wheel_Radius
         self.L = self.Differential
+        self.J = self.Inertia
+        self.m = self.Mass
 
 @dataclass
 class SensorData:
@@ -77,9 +85,3 @@ class Position:
             [sin(self.θ),  cos(self.θ), self.y],
             [0,            0,           1     ]
             ])
-
-def main() -> None:
-    pass
-
-if __name__ == "__main__":
-    main()
