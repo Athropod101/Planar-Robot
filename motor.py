@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from math import pi as π, exp
+from math import pi as π, exp, log10, floor
 from scipy.linalg import expm
 from data_structures import MotorData
 from numpy import array, sqrt, eye, empty, arange, shape
 from numpy.linalg import eig, inv
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt, ticker as tkr
 
 class VoltageOverload(Exception):
     pass
@@ -117,7 +117,7 @@ class Motor:
         sqrt(1 / (ω_d / σ_d + 1))
 
     def _Find_Response(self, A, B, T_s) -> array:
-        T = 2 * T_s
+        T = 1.5 * T_s
         i_max = 1000
         δt = T / i_max
         Ainv = inv(A)
@@ -136,8 +136,8 @@ class _SystemPlot:
     def __post_init__(self):
         fig, ax = self._BuildFigure()
         self._BuildAxes(ax)
-        self._BuildResponse(ax[0], self.System.t, self.System.ω_t)
-        self._BuildPoles()
+        self._BuildResponse(ax[0], self.System.t, self.System.ω_t, self.System.T_s, self.System.T_p, -self.System.AinvB[1, 0])
+        self._BuildPoles(ax[1], self.System.σ_d, self.System.ω_d)
         plt.show()
 
     def _BuildFigure(self):
@@ -147,48 +147,142 @@ class _SystemPlot:
         return fig, ax
 
     def _BuildAxes(self, ax):
-        ylines = (
-                abs(self.System.AinvB[1, 0]),
-                0,
-                )
         titles = (
                 "Transient Response Time",
                 "S-Plane Stability",
                 )
+
         ax[0].margins(x = 0)
+        ax[0].axhline(
+                y = abs(self.System.AinvB[1, 0]),
+                color = "black",
+                linestyle = '--',
+                alpha = 0.5,
+                zorder = 0,
+                )
+
+        ax[1].spines['left'].set_position('zero')
+        ax[1].spines['bottom'].set_position('zero')
+        ax[1].spines['right'].set_visible(False)
+        ax[1].spines['top'].set_visible(False)
 
         for i in range(2):
-            ax[i].axhline(
-                    y = ylines[i],
-                    color = "black",
-                    linestyle = '--',
-                    alpha = 0.5,
-                    zorder = 0,
-                    )
-
             ax[i].set_title(titles[i])
 
-            ax[1].axvline(
-                    x = 0,
-                    color = "black",
-                    linestyle = '--',
-                    alpha = 0.5,
-                    zorder = 0,
-                    )
-
-    def _BuildResponse(self, ax, t, ω_t):
-        response = ax.plot(t, ω_t)
-        ax.set_xlabel("Time (s)")
+    def _BuildResponse(self, ax, t, ω_t, T_s, T_p, AinvB):
+        t = list(map(lambda T: T * 1e3, t))
+        nbins = 8
+        ax.set_xlabel("Time (ms)")
         ax.set_ylabel("Angular Velocity (rad/s)")
 
-    def _BuildPoles(self):
-        pass
+        # Generating Ticks
+        ax.xaxis.set_major_locator(tkr.MaxNLocator(nbins = nbins))
+        ax.yaxis.set_major_locator(tkr.MaxNLocator(nbins = nbins))
+
+        response = ax.plot(t, ω_t, zorder = 5)
+
+        # Removing 0-Tick:
+        ax.set_xticks(ax.get_xticks()[1:])
+
+        # Flooring x-Lim:
+        ax.set_ylim(bottom = 0)
+
+        # Plotting Settling Time
+        ax.plot([T_s * 1e3] * 2, [AinvB, 0], color = "black", linestyle = "--", alpha = 0.5)
+        ax.annotate(
+                r'$\mathregular{T_s}$' + f' = {int(T_s * 1e6)} μs',
+                xy = (2/3, 0),
+                xycoords = 'axes fraction',
+                xytext = (5, 5),
+                textcoords = 'offset points',
+                fontweight = 'bold'
+                )
+
+        # Plotting Peak Time (if Applicable)
+        if self.System.Underdamped:
+            ax.plot([T_p * 1e3] * 2, [AinvB, 0], color = "black", linestyle = "--", alpha = 0.5)
+            ax.annotate(
+                    r'$\mathregular{T_p}$' + f' = {int(T_p * 1e6)} μs',
+                    xy = (2 / 3 * T_p / T_s, 0),
+                    xycoords = 'axes fraction',
+                    xytext = (5, 5),
+                    textcoords = 'offset points',
+                    fontweight = 'bold'
+                    )
+
+        ax.grid(True)
+
+
+    def _BuildPoles(self, ax, σ_d, ω_d):
+        nbins = 8
+        ω_d = abs(ω_d)
+        σ_d = (-σ_d[0], -σ_d[1])
+        ax.scatter(σ_d, [ω_d, -ω_d], s = 20, marker = 'o', zorder = 10, color = "red")
+        ax.set_xlim(right = -min(σ_d))
+        ax.grid(True)
+
+        # Generating Ticks
+        ax.xaxis.set_major_locator(tkr.MaxNLocator(nbins = nbins))
+        if self.System.Underdamped:
+            ax.yaxis.set_major_locator(tkr.MaxNLocator(nbins = nbins))
+        else:
+            ax.set_yticks([0] * nbins)
+
+        # Statically Locking Ticks
+        ax.set_xticks(ax.get_xticks())
+        ax.set_yticks(ax.get_yticks())
+
+        # Adding j to all y-Tick Labels
+        ax.set_yticklabels([f"{y.get_text()}j" for y in ax.get_yticklabels()])
+
+        # Erasing 0 from the Tick Labels
+        for xlabel, ylabel in zip(ax.get_xticklabels(), ax.get_yticklabels()):
+                xpos, _ = xlabel.get_position()
+                _, ypos = ylabel.get_position()
+                Erasex = (xpos < min(σ_d)) or (xpos == 0) or (xpos > -min(σ_d))
+                Erasey = (ypos < -ω_d) or (ypos == 0) or (ypos > ω_d)
+
+                xlabel.set_visible(~Erasex)
+                ylabel.set_visible(~Erasey)
+
+
+        # Underdamped Extra Lines
+        if self.System.Underdamped:
+            # Percent Overshoot
+            ax.plot([σ_d[0], 0], [ω_d, 0], color = "black", linestyle = '--', alpha = 0.5)
+            ax.plot([σ_d[0], 0], [-ω_d, 0], color = "black", linestyle = '--', alpha = 0.5)
+
+            # y-Lines
+            ax.plot([σ_d[0], 0], [ω_d] * 2, color = "black", linestyle = '--', alpha = 0.5)
+            ax.plot([σ_d[0], 0], [-ω_d] * 2, color = "black", linestyle = '--', alpha = 0.5)
+
+            # x-Lines
+            ax.plot([σ_d[0]] * 2, [ω_d, 0], color = "black", linestyle = '--', alpha = 0.5)
+            ax.plot([σ_d[0]] * 2, [-ω_d, 0], color = "black", linestyle = '--', alpha = 0.5)
+
+        # Annotating Real Axis
+        ax.annotate(
+                f'Real (σ)',
+                xy = (1, 0.5),
+                xycoords = 'axes fraction',
+                xytext = (-50, 5),
+                textcoords = 'offset points',
+                fontweight = 'bold'
+                )
+
+        # Annotating Imaginary Axis
+        ax.annotate(
+                f'Imag (ω)',
+                xy = (0.5, 1),
+                xycoords = 'axes fraction',
+                xytext = (5, -10),
+                textcoords = 'offset points',
+                fontweight = 'bold'
+                )
 
 '''Testing'''
 def main() -> None:
     TestMotor = Motor()
-    print(TestMotor.System.Underdamped)
-    print(TestMotor.System.pOV)
 
     def Display(Vl, Vr, RPM = False) -> None:
         ω = {k: round(v, 2) for k, v in TestMotor.WriteVoltage({"Left": Vl, "Right": Vr}, RPM).items()}
