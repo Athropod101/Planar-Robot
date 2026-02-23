@@ -139,16 +139,17 @@ class _SystemPlot:
         self._BuildAxes(ax)
         self._BuildResponse(ax[0], self.System.t, self.System.ω_t, self.System.T_s, self.System.T_p, -self.System.AinvB[1, 0])
         self._BuildPoles(ax[1], self.System.σ_d, self.System.ω_d)
-        self._BuildTable(ax[2], self.System, self.Data)
+        self._BuildLeftTable(ax[2], self.Data)
+        self._BuildRightTable(ax[3], self.System)
         plt.show()
 
     def _BuildFigure(self):
         fig, ax = plt.subplot_mosaic(
-                [['Response', 'Poles'], ['Table', 'Table']],
+                [['Response', 'Poles'], ['LeftTable', 'RightTable']],
                 layout = "constrained"
                 )
         ax = list(ax.values())
-        fig.suptitle("DC Motor System Data")
+        fig.suptitle("DC Motor System Data", fontsize = 16, fontweight = 'bold')
         return fig, ax
 
     def _BuildAxes(self, ax):
@@ -172,7 +173,7 @@ class _SystemPlot:
         ax[1].spines['top'].set_visible(False)
 
         for i in range(2):
-            ax[i].set_title(titles[i])
+            ax[i].set_title(titles[i], style = "italic")
 
     def _BuildResponse(self, ax, t, ω_t, T_s, T_p, AinvB):
         t = list(map(lambda T: T * 1e3, t))
@@ -204,7 +205,7 @@ class _SystemPlot:
                 )
 
         # Plotting Peak Time (if Applicable)
-        if self.System.Underdamped:
+        if self.System.Underdamped and (T_p < 4/3 * T_s):
             ax.plot([T_p * 1e3] * 2, [AinvB, 0], color = "black", linestyle = "--", alpha = 0.5)
             ax.annotate(
                     r'$\mathregular{T_p}$' + f' = {int(T_p * 1e6)} μs',
@@ -284,19 +285,20 @@ class _SystemPlot:
                 fontweight = 'bold'
                 )
 
-    def _BuildTable(self, ax, System, Data):
-        for i, spine in enumerate(ax.spines.keys()):
-            ax.spines[spine].set_visible(False)
-        ax.set_xticks([])
-        ax.set_yticks([])
-
-        colLabels = ["Datum", "Symbol", "Value", "Unit"] * 2
+    def _BuildLeftTable(self, ax, Data):
         DataText = [["Damping Constant", "Inertia", "Motor Constant", "Resistance", "Inductance", "Minimum Voltage", "Maximum Voltage"],
                     ["D", "J", "k", "R", "L", r"$\mathregular{V_{min}}$", r"$\mathregular{V_{max}}$"],
                     [f"{self.Data.D:.4f}", f"{self.Data.J:.4f}", f"{self.Data.k:.4f}", f"{self.Data.R:.4f}", f"{self.Data.L:.4f}", f"{self.Data.V_min:.4f}", f"{self.Data.V_max:.4f}"],
                     [r"$\mathregular{kgm^2/s}$", r"$\mathregular{kgm^2}$", r"$\mathregular{Vs}$", "Ω", "Ωs", "V", "V"],
                     ]
+        Title = "Parameters"
 
+        self._BuildTable(ax, DataText, Title)
+
+
+
+    def _BuildRightTable(self, ax, System):
+        Title = "System Dynamics"
         if System.Underdamped: 
             SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{int(self.System.ω_d)}"]
             T_p = f"{int(self.System.T_p * 1e6)}"
@@ -308,19 +310,28 @@ class _SystemPlot:
         SystemText = [["Exponential Frequency", SecondFreq[0], "Natural Frequency", "Damping Ratio", "Settling Time", "Peak Time", "Overshoot"],
                       [r"$\mathregular{σ_d}$", SecondFreq[1], r"$\mathregular{ω_n}$", "ζ", r"$\mathregular{T_s}$", r"$\mathregular{T_p}$", "%OV"],
                       [f"{int(self.System.σ_d[0])}", SecondFreq[2], f"{int(self.System.ω_n)}", f"{self.System.ζ:.4f}", f"{int(self.System.T_s * 1e6)}", T_p, pOV],
-                      ["Hz", "Hz", "Hz", "", "μs", "μs", "%"]]
+                      ["Hz", "Hz", "Hz", "--", "μs", "μs", "%"]]
 
-        cellText = DataText + SystemText
+        self._BuildTable(ax, SystemText, Title)
+
+    def _BuildTable(self, ax, cellText, title) -> None:
+        ax.set_title(title, style = 'italic')
+        for i, spine in enumerate(ax.spines.keys()):
+            ax.spines[spine].set_visible(False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        colLabels = ["Datum", "Symbol", "Value", "Unit"]
+
         cellText = list(map(list, zip(*cellText)))
 
-        cellColors = [['lightgray'] * 8, ['w'] * 8]
-        for i in range(3): cellColors = cellColors + [['lightgray'] * 8, ['w'] * 8]
+        cellColors = [['lightgray'] * 4, ['w'] * 4]
+        for i in range(3): cellColors = cellColors + [['lightgray'] * 4, ['w'] * 4]
         cellColors.pop()
 
-        Table = ax.table(cellText = cellText, cellColours = cellColors, colLabels = colLabels, loc = 'center', cellLoc = 'center', colColours = ['#6dd0ee'] * 8)
+        Table = ax.table(cellText = cellText, cellColours = cellColors, colLabels = colLabels, loc = 'upper center', cellLoc = 'center', colColours = ['#6dd0ee'] * 8)
         Table.auto_set_font_size(False)
-        Table.set_fontsize(10)
-        Table.auto_set_column_width(range(8))
+        Table.set_fontsize(11)
 
 '''Testing'''
 def main() -> None:
