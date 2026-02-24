@@ -72,8 +72,6 @@ class Control:
     def _FindAlpha(self, TunedError) -> float:
         beta : float = self.beta
         alpha: float = TunedError * beta
-        if __name__ == "__main__":
-            print(f"Alpha             : {float(alpha):5.2f}\n")
         if alpha > 1:
             alpha = 1
         elif alpha < -1:
