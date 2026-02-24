@@ -176,7 +176,7 @@ class _SystemPlot:
             ax[i].set_title(titles[i], style = "italic")
 
     def _BuildResponse(self, ax, t, ω_t, T_s, T_p, AinvB):
-        t = list(map(lambda T: T * 1e3, t))
+        t = t * 1e3
         nbins = 8
         ax.set_xlabel("Time (ms)")
         ax.set_ylabel("Angular Velocity (rad/s)")
@@ -194,9 +194,10 @@ class _SystemPlot:
         ax.set_ylim(bottom = 0)
 
         # Plotting Settling Time
-        ax.plot([T_s * 1e3] * 2, [AinvB, 0], color = "black", linestyle = "--", alpha = 0.5)
+        ω_T_s = ω_t[t >= T_s * 1e3][0]
+        ax.plot([T_s * 1e3] * 2, [ω_T_s, 0], color = "black", linestyle = "--", alpha = 0.5)
         ax.annotate(
-                r'$\mathregular{T_s}$' + f' = {int(T_s * 1e6)} μs',
+                r'$\mathregular{T_s}$' + f' = {float(T_s * 1e3):.3f} ms',
                 xy = (2/3, 0),
                 xycoords = 'axes fraction',
                 xytext = (5, 5),
@@ -206,9 +207,10 @@ class _SystemPlot:
 
         # Plotting Peak Time (if Applicable)
         if self.System.Underdamped and (T_p < 4/3 * T_s):
-            ax.plot([T_p * 1e3] * 2, [AinvB, 0], color = "black", linestyle = "--", alpha = 0.5)
+            ω_T_p = ω_t[t >= T_p * 1e3][0]
+            ax.plot([T_p * 1e3] * 2, [ω_T_p, 0], color = "black", linestyle = "--", alpha = 0.5)
             ax.annotate(
-                    r'$\mathregular{T_p}$' + f' = {int(T_p * 1e6)} μs',
+                    r'$\mathregular{T_p}$' + f' = {float(T_p * 1e3):.3f} ms',
                     xy = (2 / 3 * T_p / T_s, 0),
                     xycoords = 'axes fraction',
                     xytext = (5, 5),
@@ -300,17 +302,18 @@ class _SystemPlot:
     def _BuildRightTable(self, ax, System):
         Title = "System Dynamics"
         if System.Underdamped: 
-            SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{int(self.System.ω_d)}"]
-            T_p = f"{int(self.System.T_p * 1e6)}"
-            pOV = f"{self.System.pOV:.4f}"
+            SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{self.System.ω_d:#.4g}"]
+            T_p = f"{float(self.System.T_p * 1e3):#.4g}"
+            print(self.System.pOV)
+            pOV = f"{self.System.pOV:#.4g}"
         else:
-            SecondFreq = ["Exponential Frequency", r"$\mathregular{σ_d}$", f"{int(self.System.σ_d[1])}"]
+            SecondFreq = ["Exponential Frequency", r"$\mathregular{σ_d}$", f"{self.System.σ_d[1]:#.4g}"]
             T_p = "N/A"
             pOV = "0.0000"
         SystemText = [["Exponential Frequency", SecondFreq[0], "Natural Frequency", "Damping Ratio", "Settling Time", "Peak Time", "Overshoot"],
                       [r"$\mathregular{σ_d}$", SecondFreq[1], r"$\mathregular{ω_n}$", "ζ", r"$\mathregular{T_s}$", r"$\mathregular{T_p}$", "%OV"],
-                      [f"{int(self.System.σ_d[0])}", SecondFreq[2], f"{int(self.System.ω_n)}", f"{self.System.ζ:.4f}", f"{int(self.System.T_s * 1e6)}", T_p, pOV],
-                      ["Hz", "Hz", "Hz", "--", "μs", "μs", "%"]]
+                      [f"{self.System.σ_d[0]:#.4g}", SecondFreq[2], f"{self.System.ω_n:#.4g}", f"{self.System.ζ:#.4g}", f"{float(self.System.T_s * 1e3):#.4g}", T_p, pOV],
+                      ["Hz", "Hz", "Hz", "--", "ms", "ms", "%"]]
 
         self._BuildTable(ax, SystemText, Title)
 

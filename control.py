@@ -28,19 +28,6 @@ class Control:
             self.V_set = self.V_max
             self.dV_cap = self.V_max - self.V_min
 
-    def __repr__(self):
-        rep = (
-                f"Set Point         : {float(self.y_set):5.2f} m\n"
-                f"Set Angle         : {float(self.Theta_set):5.2f} rad\n"
-                f"Set Voltage       : {float(self.V_set):5.2f} V\n"
-                f"Proportional      : {float(self.kP):5.2f}\n"
-                f"Integral          : {float(self.kI):5.2f} 1/s\n"
-                f"Derivative        : {float(self.kD):5.2f} s\n"
-                f"Beta              : {float(self.beta):5.2f} V/rad\n"
-                f"1/Beta            : {float(1 / self.beta):5.2f} rad/V\n"
-                )
-        return rep
-
     def _SetTheta(self, y_new) -> float:
         self.yError   : float = y_new - self.y_set
         #Theta_set: float = m.atan(-self.yError)
@@ -59,14 +46,7 @@ class Control:
         self.DError        : float  = self.kD * (ThetaError_new - self.ThetaError) / self.dt
         self.TunedError    : float  = self.PError + self.IError + self.DError
         self.ThetaError = ThetaError_new
-        if __name__ == "__main__":
-            print(
-                    f"Orientation Error : {float(ThetaError_new):5.2f} rad\n"
-                    f"Proportional Error: {float(PError):5.2f} rad\n"
-                    f"Integral Error    : {float(self.IError):5.2f} rad\n"
-                    f"Derivative Error  : {float(DError):5.2f} rad\n"
-                    f"Tuned Error       : {float(TunedError):5.2f} rad"
-                    )
+
         return self.TunedError
 
     def _FindAlpha(self, TunedError) -> float:

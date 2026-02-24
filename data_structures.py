@@ -14,7 +14,7 @@ from typing import Literal
 class MotorData:
     Eq_Viscosity    : float = 1.0000 # kgm2/s
     Inertia         : float = 0.0010 # kgm2
-    Motor_Constant  : float = 0.4604 # V/rad
+    Motor_Constant  : float = 1.4604 # V/rad
     Resistance      : float = 0.9470 # Ω
     Inductance      : float = 0.0020 # Ωs
     Max_Voltage     : float = 6.0000 # V

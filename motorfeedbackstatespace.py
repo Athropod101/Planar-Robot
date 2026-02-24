@@ -30,7 +30,7 @@ U = Matrix([
 
 Xo = Matrix([
     [0],
-    [-Vcap],
+    [-Vo],
     ])
 
 sse = -A.inv() * B * U
