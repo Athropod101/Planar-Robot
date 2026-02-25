@@ -12,11 +12,11 @@ from typing import Literal
 
 @dataclass
 class MotorData:
-    Eq_Viscosity    : float = 1.0000 # kgm2/s
+    Eq_Viscosity    : float = 0.0072 # kgm2/s
     Inertia         : float = 0.0010 # kgm2
-    Motor_Constant  : float = 1.4604 # V/rad
+    Motor_Constant  : float = 0.4604 # V/rad
     Resistance      : float = 0.9470 # Ω
-    Inductance      : float = 0.0020 # Ωs
+    Inductance      : float = 0.0220 # Ωs
     Max_Voltage     : float = 6.0000 # V
     Min_Voltage     : float = 3.0000 # V
 
@@ -31,14 +31,14 @@ class MotorData:
 
 @dataclass
 class BodyData:
-    Wheel_Radius: float = 0.02 # m
+    Wheel_Radius: float = 0.05 # m
     Differential: float = 0.10 # m
     Inertia     : float = 0.20 # kgm2
     Mass        : float = 0.50 # kg
 
     def __post_init__(self):
         self.r = self.Wheel_Radius
-        self.L = self.Differential
+        self.l = self.Differential
         self.J = self.Inertia
         self.m = self.Mass
 

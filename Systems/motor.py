@@ -39,8 +39,8 @@ class Motor:
         σ_d = abs(λ.real)
         ω_d = abs(λ.imag[0])
         Underdamped = True if ω_d != 0 else False
-        ω_n = sqrt(σ_d.prod())
-        ζ = self._Find_ζ(ω_d, σ_d, Underdamped, ω_n)
+        ζ = self._Find_ζ(ω_d, σ_d, Underdamped)
+        ω_n = σ_d[0] / ζ if Underdamped else sqrt(σ_d.prod())
         T_s = 4 / min(σ_d)
 
         if Underdamped:
@@ -106,11 +106,11 @@ class Motor:
 
         return A
 
-    def _Find_ζ(self, ω_d, σ_d, Underdamped, ω_n) -> float:
+    def _Find_ζ(self, ω_d, σ_d, Underdamped) -> float:
         if Underdamped:
             ζ = sqrt(1 / (ω_d / σ_d[0] + 1))
         else:
-            ζ = sum(σ_d) / 2 / ω_n
+            ζ = sum(σ_d) / 2 / sqrt(σ_d[0] * σ_d[1])
 
         return ζ
 
@@ -343,16 +343,6 @@ def main() -> None:
     def Display(Vl, Vr, RPM = False) -> None:
         ω = {k: round(v, 2) for k, v in TestMotor.WriteVoltage({"Left": Vl, "Right": Vr}, RPM).items()}
         print(ω)
-
-    #print("\nTesting Write Voltage:")
-    #Display(5, 5)
-    #print("\nTesting Below Minimum Voltage:")
-    #Display(2, 3)
-    #Display(3, 2)
-    #print("\nTesting RPM:")
-    #Display(5, 5, True)
-    #print("\nTesting Above Maximum Voltage:")
-    #Display(7, 3)
 
 if __name__ == "__main__":
     main()

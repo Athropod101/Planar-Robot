@@ -1,6 +1,6 @@
 from sympy import *
 
-Vcap, θdot, Vdot, θ, V, γ, ki, kp, kd, u, θs = symbols('Vcap θdot Vdot θ V γ ki kp kd u θs')
+Vo, θdot, Vdot, θ, V, γ, ki, kp, kd, u, θs = symbols('Vo θdot Vdot θ V γ ki kp kd u θs')
 
 A = Matrix([
     [  0,  γ  ,],

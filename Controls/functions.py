@@ -26,7 +26,7 @@ class SecondOrderStateSpace(ABC):
     ''' Private '''
     def _UnitResponse(self, Xo: np.array, B: np.array, U: np.array) -> np.array:
         A, t = self.A, self.t
-        AiBU = inv(A) @ B @ U
+        AiBU = inv(A) @ B * U
 
         xt = np.empty([2, t.shape[0]])
         for i, _ in enumerate(t):
@@ -34,25 +34,19 @@ class SecondOrderStateSpace(ABC):
             xt[:, i] = XT.flatten()
         return xt
 
-    def _RampResponse(self, Xo: np.array, B: np.array, U: np.array) -> np.array:
+    def _RampResponse(self, Xo: np.array, B: np.array, U: float) -> np.array:
         A, t, δt = self.A, self.t, self.δt
 
-        F = np.empty([2, t.shape[0]])
         xt = np.empty([2, t.shape[0]])
-        I = 0
+        xt[:, 0] = Xo.squeeze()
+        I = np.zeros((2,))
+        beq = B[1][0]
 
-        '''
-        for i, τ in enumerate(t):
-            if i > 300: print(U[1][0])
-            I += expm(A * (t[-1] - τ)) * B @ np.array([[U[0][0](τ)], [U[1][0]]]) * δt
-            xt[:, i] = (expm(A * τ) @ Xo + I).flatten()
-        '''
-        for i, _ in enumerate(t):
-            φ = lambda τ: np.exp(-τ) * np.array([[U[0][0](τ)], [U[1][0]]])
-            f = φ(t[i]).flatten()
-            I += f
-            F[:, i] = I
-            xt[:, i] = (expm(A * t[i]) @ (Xo.flatten() + B @ F[:, i])).flatten()
+        for i in range(0, t.shape[0] - 1):
+            B[1][0] = beq(t[i])
+            arg = ( A @ xt[:, i] + (B.squeeze() * U))
+            I +=  arg.astype(float) * δt
+            xt[:, i + 1] = I
 
         return xt
 
@@ -100,7 +94,6 @@ class SecondOrderStateSpace(ABC):
         else    : return None
 
 def main() -> None:
-    Response = "Ramp"
 
     import data_structures as ds
     from matplotlib import pyplot as plt
@@ -111,47 +104,28 @@ def main() -> None:
 
 
     γ = 2 * BData.r / BData.l * MData.k / (MData.D * MData.R + MData.k**2)
-    kp = 2
-    ki = 1
+    kp = 5
+    ki = 10
     #ki = kp ** 2 * γ / 4 - 0.1
-    Vset = 6
 
     A = np.array([
-        [0  ,  γ     ],
-        [-ki, -kp * γ],
+        [0  ,  1     ],
+        [-ki * γ, -kp * γ],
         ])
 
-    uo = 0.1
-    m = -π/2
-    uset = lambda t: m * t
-    #Vo = uset * kp if -uset * kp > -3 else -3
-    Vo = 0
-    Xo = np.array([[uo], [Vo]])
-    B = np.array([ [0, 0], [ki, kp] ])
-    U = np.array([ [uset] , [m] ])
-
-    '''Motor''''''
-    R = MData.R
-    L = MData.L
-    k = MData.k
-    J = MData.J
-    D = MData.D
-    A = np.array([
-        [-R/L, -k/L],
-        [ k/J, -D/J],
-        ])
-    Xo = np.array([[0],[0]])
-    B = np.array([[1/L], [0]])
-    U = np.array([[1]])
-    Motor End'''
+    Response = "Ramp"
+    uo = 0
+    U = -0.5
+    wo = 0
+    Xo = np.array([[uo], [wo]])
+    B = np.array([ [0], [lambda t: γ * (ki * t + kp)] ])
+    B[1][0] = B[1][0] if Response == "Ramp" else γ * ki
 
     System = SecondOrderStateSpace(A)
     xt = System.SolveResponse(Xo, B, U, Response)
-
-    print("Time")
-    print(System.t[0:15])
-    print("\nTheta")
-    print(xt[0][0:15])
+    mask = xt[0] > - π / 2
+    xt = xt[:, mask]
+    System.t = System.t[mask]
 
     fig, ax = plt.subplot_mosaic([['Theta', 'Voltage']])
     ax['Theta'].plot(System.t, xt[0])
