@@ -21,8 +21,6 @@ class StateSpace(ABC):
     T_s     : float | None  = field(init = False)
     σ_d     : np.ndarray    = field(init = False)
     ω_d     : np.ndarray    = field(init = False)
-    t       : np.ndarray    = field(init = False)
-    δt      : float         = field(init = False)
 
     def __post_init__(self) -> None:
         self.Order = self.A.shape[0]
@@ -46,17 +44,20 @@ class StateSpace(ABC):
         N = self.Order
 
         if self.Stable:
-            t = self.t
-            δt = self.δt
+            t_max = 1.5 * self.T_s
+            i_max = 300
+            δt = t_max / i_max
 
             # Computing the integral
-            AiBU = inv(A) @ B * U
-            xt = np.empty([N, t.shape[0]])
-            for i, _ in enumerate(t):
-                XT = expm(A * t[i]) @ (Xo + AiBU) - AiBU
+            AiBU = inv(A) @ B @ U
+            xt = np.empty((N, i_max), dtype = float)
+            t = np.empty((1, i_max), dtype = float)
+            for i in range(i_max):
+                t[0, i] = δt * i
+                XT = expm(A * t[0, i]) @ (Xo + AiBU) - AiBU
                 xt[:, i] = XT.flatten()
         # NOTE missing code for unstable case here.
-        return xt
+        return xt, t
 
 @dataclass
 class SOStateSpace(StateSpace):
@@ -80,7 +81,7 @@ class SOStateSpace(StateSpace):
         Underdamped = self.Underdamped
         σ_d = abs(self.σ_d)
         if Underdamped:
-            ζ = np.sqrt(1 / (ω_d[0] / σ_d[0] + 1))
+            ζ = np.sqrt(1 / (self.ω_d[0] / self.σ_d[0] + 1))
         else:
             ζ = sum(σ_d) / 2 / np.sqrt(σ_d.prod())
 
@@ -95,7 +96,14 @@ def main():
         [ k/J, -D/J],
         ])
     Motor = SOStateSpace(A)
+    B = np.array([[1/L], [0]])
+    U = np.array([[1]])
+    Xo = np.zeros((2,1), dtype=float)
+    xt, t = Motor.StepResponse(Xo, B, U)
     #print(Motor.T_p)
+    T = (np.where(t >= Motor.T_p))
+    print(T[1])
+    print(xt[1][T[1][0]])
 
 if __name__ == "__main__":
     main()
