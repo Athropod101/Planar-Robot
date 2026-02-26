@@ -33,14 +33,10 @@ class MotorData:
 class BodyData:
     Wheel_Radius: float = 0.05 # m
     Differential: float = 0.10 # m
-    Inertia     : float = 0.20 # kgm2
-    Mass        : float = 0.50 # kg
 
     def __post_init__(self):
         self.r = self.Wheel_Radius
         self.l = self.Differential
-        self.J = self.Inertia
-        self.m = self.Mass
 
 @dataclass
 class SensorData:

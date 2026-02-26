@@ -140,7 +140,7 @@ class _SystemPlot:
         self._BuildPoles(ax[1], self.System.σ_d, self.System.ω_d)
         self._BuildLeftTable(ax[2], self.Data)
         self._BuildRightTable(ax[3], self.System)
-        #plt.show()
+        plt.show()
 
     def _BuildFigure(self):
         fig, ax = plt.subplot_mosaic(
