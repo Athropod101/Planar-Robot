@@ -80,15 +80,54 @@ def Poles(ax, σ: np.array, ω: np.array) -> None:
         ax.plot([σ[0, 0]] * 2, [w, 0], color = "black", linestyle = '--', alpha = 0.5)
         ax.plot([σ[0, 0]] * 2, [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
 
+def Table(ax, Collumns: dict, Title: str) -> None:
+    colors = ['lightgray', 'white']
+    HeaderColor = '#6dd0ee'
+    ax.set_title(Title, style = 'italic')
+
+    # Deleting spines
+    for i, spine in enumerate(ax.spines.keys()):
+        ax.spines[spine].set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    colLabels = list(Collumns.keys())
+    cellText = list(map(list, zip(*Collumns.values()))) # Transposes them
+
+    n = len(cellText)
+    m = len(colLabels)
+    cellColors = [None] * n
+    rowColors = [colors[0] if col % 2 == 0 else colors[1] for col in range(m)]
+    cellColors = [rowColors for _ in range(n)]
+
+    Table = ax.table(
+            cellText = cellText,
+            cellColours = cellColors,
+            colLabels = colLabels,
+            loc = 'upper center', cellLoc = 'center', colColours = [HeaderColor] * m)
+    Table.set_fontsize(11)
+
 def main():
     # Testing Poles
-    ''' WORKS!!!
     fig, ax = plt.subplots()
+    ''' WORKS!!!
     σ = np.array([[-1, -1]])
     ω = np.array([[-1, 1]])
 
     Poles(ax, σ, ω)
     '''
+    # Testing Tables
+    ''' WORKS!!!
+    Title = "Characters"
+    Collumns = {
+            "Name": ["Tianno", "Suleica", "John", "Faden"],
+            "Height": ["6'0", "6'0", "6'2", "6'2"],
+            "Specialization": ["Dragon", "Saint", "Knight", "Warlock"],
+            }
+    Table(ax, Collumns, Title)
+    '''
+
+
 
     plt.show()
 
