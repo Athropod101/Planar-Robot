@@ -49,7 +49,6 @@ class Motor:
 
         ω_t, t, AinvB = self._Find_Response(A, B, T_s)
 
-
         # Storing as Object Data
         self.System.A = A
         self.System.B = B
@@ -69,7 +68,7 @@ class Motor:
 
         self.SystemPlot = _SystemPlot(self.System, self.Data)
 
-    def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> dict[float]:
+    def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> None:
         k = self.Data.k
         D = self.Data.D
         R = self.Data.R
@@ -94,7 +93,7 @@ class Motor:
 
         ω = list(map(lambda v: (k * v / (D * R + k**2)) * CONV, V))
 
-        return dict(zip(["Left", "Right"], ω))
+        self.ω = dict(zip(["Left", "Right"], ω))
 
     def _Find_A(self) -> array:
         R, L, k, J, D = self.Data.R, self.Data.L, self.Data.k, self.Data.J, self.Data.D
@@ -141,7 +140,7 @@ class _SystemPlot:
         self._BuildPoles(ax[1], self.System.σ_d, self.System.ω_d)
         self._BuildLeftTable(ax[2], self.Data)
         self._BuildRightTable(ax[3], self.System)
-        plt.show()
+        #plt.show()
 
     def _BuildFigure(self):
         fig, ax = plt.subplot_mosaic(
@@ -304,7 +303,6 @@ class _SystemPlot:
         if System.Underdamped: 
             SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{self.System.ω_d:#.4g}"]
             T_p = f"{float(self.System.T_p * 1e3):#.4g}"
-            print(self.System.pOV)
             pOV = f"{self.System.pOV:#.4g}"
         else:
             SecondFreq = ["Exponential Frequency", r"$\mathregular{σ_d}$", f"{self.System.σ_d[1]:#.4g}"]
@@ -339,10 +337,6 @@ class _SystemPlot:
 '''Testing'''
 def main() -> None:
     TestMotor = Motor()
-
-    def Display(Vl, Vr, RPM = False) -> None:
-        ω = {k: round(v, 2) for k, v in TestMotor.WriteVoltage({"Left": Vl, "Right": Vr}, RPM).items()}
-        print(ω)
 
 if __name__ == "__main__":
     main()
