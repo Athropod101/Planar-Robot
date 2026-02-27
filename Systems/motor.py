@@ -182,7 +182,13 @@ class _SystemPlot:
 
 '''Testing'''
 def main() -> None:
-    TestMotor = Motor()
+    import sys
+    sys.path.append("../Plotting/")
+    sys.path.append("../Controls/")
+    sys.path.append("../etc/")
+    import etc.data_structures as ds
+    from Plotting import Primitives, MosaicMotor
+    from Controls import StateSpace
 
 if __name__ == "__main__":
     main()
