@@ -27,7 +27,6 @@ class Motor:
         self.System = SOStateSpace(self.A)
         self.x_t, self.t = self.System.StepResponse(self.B)
 
-        self.SystemPlot = _SystemPlot(self.System, self.Data)
 
     def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> None:
         k = self.Data.k
@@ -56,7 +55,7 @@ class Motor:
 
         self.ω = dict(zip(["Left", "Right"], ω))
 
-    def _Find_A(self) -> np.array:
+    def _buildA(self) -> np.array:
         R, L, k, J, D = self.Data.R, self.Data.L, self.Data.k, self.Data.J, self.Data.D
         return np.array([
             [-R/L, -k/L],

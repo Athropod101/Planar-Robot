@@ -1,8 +1,8 @@
-from matplotlib import pyplot as plt, ticker as tkr
+from matplotlib import pyplot as plt, ticker as tkr, table as tab
 from dataclasses import dataclass, field
 import numpy as np
 
-def Poles(ax, σ: np.array, ω: np.array) -> None:
+def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     nbins = 8
     msize = 20
 
@@ -80,7 +80,7 @@ def Poles(ax, σ: np.array, ω: np.array) -> None:
         ax.plot([σ[0, 0]] * 2, [w, 0], color = "black", linestyle = '--', alpha = 0.5)
         ax.plot([σ[0, 0]] * 2, [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
 
-def Table(ax, Collumns: dict, Title: str) -> None:
+def Table(ax: plt.Axes, Collumns: dict, Title: str) -> tab.Table:
     colors = ['lightgray', 'white']
     HeaderColor = '#6dd0ee'
     ax.set_title(Title, style = 'italic')
@@ -105,9 +105,11 @@ def Table(ax, Collumns: dict, Title: str) -> None:
             cellColours = cellColors,
             colLabels = colLabels,
             loc = 'upper center', cellLoc = 'center', colColours = [HeaderColor] * m)
+    Table.auto_set_font_size(False)
     Table.set_fontsize(11)
+    return Table
 
-def Response(ax, x: np.array, t: np.array, Title: str, xlabel: str, unit: str = "ms", tscale: float = 1e3, T_s: float = None, T_p: float = None) -> None:
+def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, unit: str = "ms", tscale: float = 1e3, T_s: float = None, T_p: float = None) -> None:
     nbins = 8
     t = t * tscale
     Underdamped = True if T_p is not None else False
@@ -189,15 +191,13 @@ def main() -> None:
     Poles(ax, σ, ω)
     '''
     # Testing Tables
-    ''' WORKS!!!
     Title = "Characters"
     Collumns = {
             "Name": ["Tianno", "Suleica", "John", "Faden"],
             "Height": ["6'0", "6'0", "6'2", "6'2"],
             "Specialization": ["Dragon", "Saint", "Knight", "Warlock"],
             }
-    Table(ax, Collumns, Title)
-    '''
+    tab = Table(ax, Collumns, Title)
     # Testing Response
     t = np.arange(0, 1, 0.001).reshape(1, -1) # -1 means "figure that one out, numpy"
     xlabel = "x axis"
@@ -211,9 +211,7 @@ def main() -> None:
     x = (lambda T: -np.exp(-10 * T) * np.cos(20 * T) + 1)(t)
     Response(ax, x[0], t[0], Title, xlabel, T_s = 0.5)
     '''
-
-
-    #plt.show()
+    plt.show()
 
 if __name__ == "__main__":
     main()
