@@ -25,7 +25,7 @@ class StateSpace(ABC):
     def __post_init__(self) -> None:
         self.Order = self.A.shape[0]
         self.Stable = self._CheckStability()
-        self.T_s = None if not self.Stable else 4 / abs(min(self.σ_d))
+        self.T_s = None if not self.Stable else 4 / min(abs(self.σ_d))
 
     def _CheckStability(self) -> bool:
         # Importing Attributes
@@ -73,10 +73,11 @@ class SOStateSpace(StateSpace):
 
     def __post_init__(self) -> None:
         super().__post_init__()
+        self.T_p = None # Initializing the variable even if it's overdamped.
         self.ω_d = np.sort(self.ω_d)
         self.Underdamped = True if (self.ω_d != 0).any() else False
         self.ζ = self._computeDampingRatio()
-        self.ω_n = np.sqrt(self.σ_d[0]**2 + self.ω_d[1]**2) if self.Underdamped else np.np.sqrt(σ_d.prod())
+        self.ω_n = np.sqrt(self.σ_d[0]**2 + self.ω_d[1]**2) if self.Underdamped else np.sqrt(self.σ_d.prod())
         if self.Underdamped:
             self.T_p = π / abs(self.ω_d[0])
             self.pOV = 100 * np.exp(-self.ζ * π / np.sqrt(1 - self.ζ**2))

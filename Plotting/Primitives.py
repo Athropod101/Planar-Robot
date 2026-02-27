@@ -6,8 +6,8 @@ def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     nbins = 8
     msize = 20
 
-    Underdamped = not (ω[0, 0] == ω[0, 1])
-    w = ω[0, 1] # Extracting positive frequency
+    Underdamped = not (ω[0] == ω[1])
+    w = ω[1] # Extracting positive frequency
 
     # Initial setup
     ax.set_title("S-Plane Stability", style = "italic")
@@ -69,16 +69,16 @@ def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     # Underdamped Extra Lines
     if Underdamped:
         # Percent Overshoot
-        ax.plot([σ[0, 0], 0], [w, 0], color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0, 0], 0], [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0], 0], [w, 0], color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0], 0], [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
 
         # y-Lines
-        ax.plot([σ[0, 0], 0], [w] * 2, color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0, 0], 0], [-w] * 2, color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0], 0], [w] * 2, color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0], 0], [-w] * 2, color = "black", linestyle = '--', alpha = 0.5)
 
         # x-Lines
-        ax.plot([σ[0, 0]] * 2, [w, 0], color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0, 0]] * 2, [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0]] * 2, [w, 0], color = "black", linestyle = '--', alpha = 0.5)
+        ax.plot([σ[0]] * 2, [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
 
 def Table(ax: plt.Axes, Collumns: dict, Title: str) -> tab.Table:
     colors = ['lightgray', 'white']
@@ -199,7 +199,7 @@ def main() -> None:
             }
     tab = Table(ax, Collumns, Title)
     # Testing Response
-    t = np.arange(0, 1, 0.001).reshape(1, -1) # -1 means "figure that one out, numpy"
+    t = np.arange(0, 1, 0.001)
     xlabel = "x axis"
     ''' Undamped works
     Title = "Simple Undamped"

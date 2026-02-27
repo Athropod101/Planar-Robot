@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 import numpy as np
 from matplotlib import pyplot as plt, table as tb
-from Primitives import *
+from Plotting.Primitives import *
 
 def MosaicMotor(Suptitle: str, 
                 t: np.array, x: np.array, xTitle: str, xLabel: str,
@@ -31,8 +31,8 @@ def main() -> None:
     xTitle = "Simple Undamped"
     xLabel = "x axis"
     
-    σ = np.array([[-1, -1]])
-    ω = np.array([[-1, 1]])
+    σ = np.array([[-1, -1]]).squeeze()
+    ω = np.array([[-1, 1]]).squeeze()
 
     TableTitles = {"Left": "Characters", "Right": "Monsters"}
     TableContents = {"Left": {

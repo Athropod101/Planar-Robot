@@ -12,11 +12,11 @@ from typing import Literal
 
 @dataclass
 class MotorData:
-    Eq_Viscosity    : float = 0.0072 # kgm2/s
-    Inertia         : float = 0.0010 # kgm2
-    Motor_Constant  : float = 0.4604 # V/rad
+    Eq_Viscosity    : float = 0.0020 # kgm2/s
+    Inertia         : float = 0.1010 # kgm2
+    Motor_Constant  : float = 0.4460 # V/rad
     Resistance      : float = 0.9470 # Ω
-    Inductance      : float = 0.0220 # Ωs
+    Inductance      : float = 0.0020 # Ωs
     Max_Voltage     : float = 6.0000 # V
     Min_Voltage     : float = 3.0000 # V
 
