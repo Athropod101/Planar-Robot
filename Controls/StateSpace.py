@@ -38,10 +38,14 @@ class StateSpace(ABC):
 
         return True if (self.σ_d <= 0).any() else False
 
-    def StepResponse(self, Xo: np.ndarray, B: np.ndarray, U: np.ndarray) -> np.ndarray:
+    def StepResponse(self, B: np.ndarray, Xo: np.ndarray = None, U: np.ndarray = None) -> np.ndarray:
         # Importing Attributes
         A = self.A
         N = self.Order
+
+        # Handling defaults
+        if Xo is None: Xo = np.zeros((N, 1))
+        if U is None: U = np.ones((B.shape[1] ,1))
 
         if self.Stable:
             t_max = 1.5 * self.T_s
@@ -72,7 +76,7 @@ class SOStateSpace(StateSpace):
         self.ω_d = np.sort(self.ω_d)
         self.Underdamped = True if (self.ω_d != 0).any() else False
         self.ζ = self._computeDampingRatio()
-        self.ω_n = np.sqrt(self.σ_d[0]**2 + self.ω_d[0]**2) if self.Underdamped else np.np.sqrt(σ_d.prod())
+        self.ω_n = np.sqrt(self.σ_d[0]**2 + self.ω_d[1]**2) if self.Underdamped else np.np.sqrt(σ_d.prod())
         if self.Underdamped:
             self.T_p = π / abs(self.ω_d[0])
             self.pOV = 100 * np.exp(-self.ζ * π / np.sqrt(1 - self.ζ**2))
@@ -97,13 +101,7 @@ def main():
         ])
     Motor = SOStateSpace(A)
     B = np.array([[1/L], [0]])
-    U = np.array([[1]])
-    Xo = np.zeros((2,1), dtype=float)
-    xt, t = Motor.StepResponse(Xo, B, U)
-    #print(Motor.T_p)
-    T = (np.where(t >= Motor.T_p))
-    print(T[1])
-    print(xt[1][T[1][0]])
+    xt, t = Motor.StepResponse(B)
 
 if __name__ == "__main__":
     main()
