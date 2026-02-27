@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
-from math import pi as π, exp, log10, floor
+from math import pi as π
 import numpy as np
-from matplotlib import pyplot as plt, ticker as tkr
-
+# Project Modules
 import etc.data_structures as ds
 from Plotting.Primitives import *
 from Plotting.MosaicMotor import *
@@ -22,6 +21,7 @@ class Motor:
     System: SOStateSpace = field(init = False)
     x_t: np.array = field(init = False)
     t: np.array = field(init = False)
+    α: float = field(init = False)
 
     
     def __post_init__(self):
@@ -39,6 +39,7 @@ class Motor:
                 TableTitles = TableTitles, TableContents = TableContents,
                 T_s = self.System.T_s, T_p = self.System.T_p
                 )
+        self.α = self.Data.k / (self.Data.D * self.Data.R + self.Data.k**2)
 
     def WriteVoltage(self, Voltages: dict[float], rpm: bool = False) -> None:
         k = self.Data.k
@@ -66,6 +67,9 @@ class Motor:
         ω = list(map(lambda v: (k * v / (D * R + k**2)) * CONV, V))
 
         self.ω = dict(zip(["Left", "Right"], ω))
+    
+    def SetSpeed(self, V_set: float) -> float:
+        return self.α * V_set * 30 / π
 
     def _buildA(self) -> np.array:
         R, L, k, J, D = self.Data.R, self.Data.L, self.Data.k, self.Data.J, self.Data.D

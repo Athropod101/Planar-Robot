@@ -8,11 +8,15 @@ This class is responsible for computing the full robot system's dynamics. It exi
         b. The unit response of the motor feedback system as well as the pole plot at the saturated error region.
 '''
 
-import numpy as np
-from motor import Motor
-from dataclasses import dataclass
-import data_structures as ds
+from dataclasses import dataclass, field
 from math import pi as π
+import numpy as np
+# Project Modules
+import etc.data_structures as ds
+from Plotting.Primitives import *
+from Plotting.Mosaics import *
+from Controls.StateSpace import *
+from Systems.motor import *
 
 @dataclass
 class Robot:
@@ -20,19 +24,92 @@ class Robot:
     Body: ds.BodyData
     Control: ds.ControllerData
 
-    def __post_init__(self):
-        # Internal Attribute Declaration
-        self.kt = -π/2
-        self.ks = 1
+    β: float = field(init = False)
+    γ: float = field(init = False)
+    System_Sat: SOStateSpace = field(init = False)
+    System_Small: StateSpace = field(init = False)
+    x_t_sat: np.array = field(init = False)
+    t_sat: np.array = field(init = False)
 
+    def __post_init__(self):
         # Constant Computing
         self.β = 2 * self.Body.r / self.Body.l
         self.γ = self.Motor.α * self.β
+        self.ω_set = self.Motor.SetSpeed(self.Control.V_set)
 
-        # Stability Computing
-        self.A = _computeA()
-        self.B = _computeB()
+        # Handling Saturated Error
+        self.A_sat = self._buildA("Saturated")
+        self.B_sat = self._buildB("Saturated")
+        self.System_Sat = SOStateSpace(self.A_sat)
+        self.x_t_sat, self.t_sat = self.System_Sat.StepResponse(self.B_sat, U = np.array([[-π/2]]))
+        θ_t = self.x_t_sat[0] * 180 / π
+        TableTitles = {"Left": "Parameters", "Right": "System Dynamics"}
+        Headers = {"Datum": None, "Symbol": None, "Value": None, "Unit": None}
+        TableContents = {"Left": self._buildLeftTable(Headers), "Right": self._buildRightTable(Headers)}
+        self.Figure, self.Axes, self.Tables = MosaicMotor(
+                Suptitle = "Motor Feedback Analysis",
+                t = self.t_sat[0], x = θ_t, xTitle = "Unit Step Response", xLabel = "Angle (degrees)",
+                σ = self.System_Sat.σ_d, ω = self.System_Sat.ω_d,
+                TableTitles = TableTitles, TableContents = TableContents,
+                T_s = self.System_Sat.T_s, T_p = self.System_Sat.T_p
+                )
+ 
+    def _buildA(self, Mode: str) -> np.array:
+        kp   = self.Control.kp
+        ki   = self.Control.ki
+        V_set = self.Control.V_set
+        match Mode:
+            case "Saturated":
+                return np.array([
+                    [0  ,   1],
+                    [-ki, -kp],
+                    ])
+            case "Small":
+                return no.array([
+                    [0,         V_set,   0],
+                    [0,            0,   1],
+                    [-ki * -π/2, -ki, -kp],
+                    ])
 
-    def _computeA() -> np.array:
-        Vset, ks
-        return ([
+    def _buildB(self, Mode: str) -> np.array:
+        ki = self.Control.ki
+        match Mode:
+            case "Saturated":
+                return np.array([[0], [ki]])
+            case "Small":
+                return np.array([[0], [0], [ki]])
+
+    def _buildLeftTable(self, Headers) -> list:
+        cellData = [["Differential", "Wheel Radius", "Proportional", "Integral", "Derivative", "Set Voltage", "Set Wheel Speed"],
+                    ["l", "r", "kp", "ki", "kd", r"$\mathregular{V_{set}}$", r"$\mathregular{ω_{set}}$"],
+                    [f"{self.Body.l:.4f}", f"{self.Body.r:.4f}", f"{self.Control.kp:.4f}", f"{self.Control.ki:.4f}", f"{self.Control.kd:.4f}", f"{self.Control.V_set:.4f}", f"{self.ω_set:#.5g}"],
+                    ["m", "m", "--", "1/s", "s", "V", "rpm"],
+                    ]
+        return {header: col for header, col in zip(Headers.keys(), cellData)}
+
+    def _buildRightTable(self, Headers) -> list:
+        if self.System_Sat.Underdamped: 
+            SecondFreq = ["Oscillation Frequency", r"$\mathregular{ω_d}$", f"{self.System_Sat.ω_d[1]:#.4g}"]
+            T_p = f"{float(self.System_Sat.T_p * 1e3):#.4g}"
+            pOV = f"{self.System_Sat.pOV:#.4g}"
+        else:
+            SecondFreq = ["Exponential Frequency", r"$\mathregular{σ_d}$", f"{abs(self.System_Sat.σ_d[1]):#.4g}"]
+            T_p = "N/A"
+            pOV = "0.0000"
+        cellData = [["Exponential Frequency", SecondFreq[0], "Natural Frequency", "Damping Ratio", "Settling Time", "Peak Time", "Overshoot"],
+                      [r"$\mathregular{σ_d}$", SecondFreq[1], r"$\mathregular{ω_n}$", "ζ", r"$\mathregular{T_s}$", r"$\mathregular{T_p}$", "%OV"],
+                      [f"{abs(self.System_Sat.σ_d[0]):#.4g}", SecondFreq[2], f"{self.System_Sat.ω_n:#.4g}", f"{self.System_Sat.ζ:#.4g}", f"{float(self.System_Sat.T_s * 1e3):#.4g}", T_p, pOV],
+                      ["Hz", "Hz", "Hz", "--", "ms", "ms", "%"]]
+        return {header: col for header, col in zip(Headers.keys(), cellData)}
+
+def main():
+    Data = ds.MotorData()
+    motor = Motor(Data)
+    Body = ds.BodyData()
+    Control = ds.ControllerData()
+
+    robot = Robot(motor, Body, Control)
+    plt.show()
+    
+if __name__ == "__main__":
+    main()

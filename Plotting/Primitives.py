@@ -132,7 +132,7 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
     # Setting Convergence Line if Stable
     if Stable:
         ax.axhline(
-                y = abs(x[-1]),
+                y = x[-1],
                 color = "black",
                 linestyle = '--',
                 alpha = 0.5,
@@ -147,13 +147,14 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
     ax.set_xticks(ax.get_xticks()[1:])
 
     # Plotting Settling Time
+    textloc = 0 if x[-1] >= 0 else 0.9
     if Stable:
         T_s = T_s * tscale
         x_T_s = x[t >= T_s][0]
         ax.plot([T_s] * 2, sorted([x_T_s, 0]), color = "black", linestyle = "--", alpha = 0.5)
         ax.annotate(
-                r'$\mathregular{T_s}$' + f' = {float(T_s):.3f} {unit}',
-                xy = (2/3, 0),
+                r'$\mathregular{T_s}$' + f' = {int(T_s)} {unit}',
+                xy = (2/3, textloc),
                 xycoords = 'axes fraction',
                 xytext = (5, 5),
                 textcoords = 'offset points',
@@ -161,7 +162,7 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
                 )
 
     # Plotting Peak Time
-    T_p_lim = 4/3 * T_s
+    T_p_lim = 3/4 * T_s
     if Underdamped:
         T_p = T_p * tscale
         x_T_p = x[t >= T_p][0]
@@ -173,8 +174,8 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
         ax.plot([T_p] * 2, sorted([x_T_p, 0]), color = "black", linestyle = "--", alpha = 0.5)
         ax.plot([0, T_p], [x_T_p] * 2, color = "black", linestyle = "--", alpha = 0.5)
         ax.annotate(
-                r'$\mathregular{T_p}$' + f' = {float(T_p):.3f} ms',
-                xy = (2 / 3 * T_p / T_s, 0),
+                r'$\mathregular{T_p}$' + f' = {int(T_p)} ms',
+                xy = (2 / 3 * T_p / T_s, textloc),
                 xycoords = 'axes fraction',
                 xytext = (5, 5),
                 textcoords = 'offset points',

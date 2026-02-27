@@ -13,8 +13,8 @@ from typing import Literal
 @dataclass
 class MotorData:
     Eq_Viscosity    : float = 0.0020 # kgm2/s
-    Inertia         : float = 0.1010 # kgm2
-    Motor_Constant  : float = 0.4460 # V/rad
+    Inertia         : float = 0.0010 # kgm2
+    Motor_Constant  : float = 0.4500 # V/rad
     Resistance      : float = 0.9470 # Ω
     Inductance      : float = 0.0020 # Ωs
     Max_Voltage     : float = 6.0000 # V
@@ -51,7 +51,16 @@ class SensorData:
 class ControllerData:
     Set_Point               : float = 0 # m
     Set_Voltage             : float = 6 # V
-    Proportional_Constant   : Literal["Default"] | float = "Default"
+    Proportional_Constant   : float = 5 # -
+    Integral_Constant       : float = 10 # -
+    Derivative_Constant     : float = 0 # -
+
+    def __post_init__(self):
+        self.y_set  = self.Set_Point
+        self.V_set  = self.Set_Voltage
+        self.kp     = self.Proportional_Constant
+        self.ki     = self.Integral_Constant
+        self.kd     = self.Derivative_Constant
 
 @dataclass
 class SimulationData:
