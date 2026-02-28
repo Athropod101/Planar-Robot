@@ -3,6 +3,7 @@ import Systems.robot as r
 import Systems.motor as m
 import numpy as np
 from dataclasses import dataclass, field
+from typing import Callable
 
 
 @dataclass
@@ -12,12 +13,10 @@ class Control:
     Sim: ds.SimulationData
     Position: ds.Position
 
-    θ_e_prev: float = field(init = False)
-    Vei: float = field(init = False)
 
     def __post_init__(self):
-        self.Vei = 0
-        self.θ_e_prev = 0
+        self.y_e = self.Data.y_set - self.Position.y
+        self.θ_e = np.tanh(-self.y_e) - self.Position.θ
         self.dV_cap    : float = self.Data.V_set - self.Robot.Motor.Data.V_min
         if self.Data.V_set > self.Robot.Motor.Data.V_max:
             print(
@@ -26,15 +25,21 @@ class Control:
                     )
             self.V_set = self.V_max
             self.dV_cap = self.V_max - self.V_min
+        self.PID = self._PIDMake()
 
-    def _PIDTune(self, θ_e: float) -> float:
+    def _PIDMake(self) -> Callable:
+        θ_e_prev = self.θ_e
+        Vei = 0
         kp, ki, kd = self.Data.kp, self.Data.ki, self.Data.kd
         δt = self.Sim.δt
-        θ_e_prev = self.θ_e_prev
-        Vep = kp * θ_e
-        self.Vei += ki * θ_e * δt
-        Ved = kd * (θ_e - θ_e_prev) / δt
-        return Vep + self.Vei + Ved
+        def PIDTune(θ_e: float) -> float:
+            nonlocal Vei, θ_e_prev
+            Vep = kp * θ_e
+            Vei += ki * θ_e * δt
+            Ved = kd * (θ_e - θ_e_prev) / δt
+            θ_e_prev = θ_e # Logging last orientation error
+            return Vep + Vei + Ved
+        return PIDTune
 
     def _InterpretVoltageError(self, V_e: float) -> dict[float]:
         V_set = self.Data.V_set
@@ -49,17 +54,17 @@ class Control:
     def FindVoltages(self) -> dict[float]:
         y = self.Position.y
         θ = self.Position.θ
-        y_e = y - self.Data.y_set
-        θ_e = θ - np.tanh(-y_e)
-        V_e = self._PIDTune(θ_e)
+        y_e = self.y_e
+        θ_e = self.θ_e
+        V_e = self.PID(θ_e)
         return self._InterpretVoltageError(V_e)
     
 def main() -> None:
     CD = ds.ControllerData()
     Robot = r.Robot(m.Motor(ds.MotorData()), ds.BodyData(), CD)
     Controller = Control(Robot, CD, ds.SimulationData(), ds.Position())
-
     print(Controller.FindVoltages())
+
 
 if __name__ == "__main__":
     main()

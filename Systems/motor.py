@@ -16,13 +16,13 @@ class VoltageUnderload(Exception):
 @dataclass
 class Motor:
     Data: ds.MotorData
+
     A: np.array = field(init = False)
     B: np.array = field(init = False)
     System: SOStateSpace = field(init = False)
     x_t: np.array = field(init = False)
     t: np.array = field(init = False)
     α: float = field(init = False)
-
     
     def __post_init__(self):
         self.A = self._buildA()

@@ -1,9 +1,14 @@
-import sys
-import importlib.util
+def closure():
+    i = 0
+    def integral(value):
+        nonlocal i
+        i += int(value)
+        return i
+    return integral
 
-# Check if Module is in sys.path and can be found
-spec = importlib.util.find_spec("Systems")
-if spec is not None:
-    print("Module is importable")
-else:
-    print("Module is not importable")   
+if __name__ == "__main__":
+    A = closure()
+    while True:
+        value = input("Enter integer: ")
+        if value == "exit": break
+        print(A(value))
