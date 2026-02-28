@@ -46,7 +46,10 @@ def main(yamlfile) -> int:
 
     Plot = plots.Plot(State.t, State.x, State.y, State.θ, State.y_e, State.θ_e, [], State.ω_left, State.ω_right, State.V_left, State.V_right, Controller.Data.y_set, Controller.Data.V_set, Motor.SetSpeed(Controller.Data.V_set), Motor.Data.V_min)
     testfig, ax = plt.subplots()
-    Primitives.DualPlotMargins(ax, State.t, State.y_e, State.θ_e, "Voltage", "Voltage", ["Left Voltage", "Right Voltage"])
+    #Primitives.DualPlotMargins(ax, State.t, State.y_e, State.θ_e, "Voltage", "Voltage", ["Left Voltage", "Right Voltage"])
+    Line =Primitives.MapMargins(ax, State.x, State.y, ControllerData.y_set)
+    Line.set_xdata(State.x)
+    Line.set_ydata(State.y)
     plt.show()
 
 if __name__ == "__main__":

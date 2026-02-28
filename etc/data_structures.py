@@ -49,7 +49,7 @@ class SensorData:
 
 @dataclass
 class ControllerData:
-    Set_Point               : float = 0 # m
+    Set_Point               : float = 1.1 # m
     Set_Voltage             : float = 6 # V
     Proportional_Constant   : float = 2 # -
     Integral_Constant       : float = 1 # -
@@ -77,7 +77,7 @@ class SimulationData:
 
 @dataclass
 class Position:
-    θ: float = 0 # rad
+    θ: float = -3.14 # rad
     x: float = 0 # m
     y: float = 1 # m
 

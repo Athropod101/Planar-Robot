@@ -1,3 +1,5 @@
+# NOTE: posibilities for future improvements:
+# 1. Make a function "DashLine" for all the horizontal and vertical lines.
 from matplotlib import pyplot as plt, ticker as tkr, table as tab
 from dataclasses import dataclass, field
 import numpy as np
@@ -229,6 +231,43 @@ def DualPlotMargins(ax: plt.Axes, t: list, x1: list, x2: list, Title: str, ylabe
             )
 
     return Lines
+
+def MapMargins(ax: plt.Axes, x: list, y: list, y_set) -> plt.Line2D:
+    # Making the line
+    Line, = ax.plot([], [])
+
+    # Set-point Line
+    ax.axhline(
+            y = y_set,
+            linestyle = "--",
+            color = "black",
+            alpha = 0.5,
+            zorder = 0,
+            )
+
+    # Setting Limits
+    margins = 1.05 # The matplotlib standard
+    xlims = [min(x), max(x)]
+    ylims = [min(y), max(y)]
+    minlim = 0.1 + y_set
+    for lim in [ylims, xlims]: # Making sure y_set isn't literally at the spine.
+        if lim[0] > -minlim: lim[0] = -minlim
+        if lim[1] <  minlim: lim[1] =  minlim
+        minlim = minlim - y_set
+    ax.set_xlim([lim * margins for lim in xlims])
+    ax.set_ylim([lim * margins for lim in ylims])
+
+    # Setting Ticks
+    ax.set_xticks([0, round(x[-1], 2)])
+    ax.set_yticks(sorted([y_set, y[0]]))
+
+    # Setting Titles
+    ax.set_title("Robot Position Map")
+    ax.set_xlabel("x-Position (m)")
+    ax.set_ylabel("y-Position (m)")
+    return Line
+
+
 
 def main() -> None:
     fig, ax = plt.subplots()
