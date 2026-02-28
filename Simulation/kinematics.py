@@ -18,12 +18,6 @@ class Kinematics:
         self.Position.θ = np.arctan2(np.sin(θ), np.cos(θ))
         return self.Position.θ
 
-        ''' This has some esoteric shit so I won't delete just yet.
-        DelTheta = self.Omega * self.SampleTime
-        self.Theta += DelTheta # % (2 * m.pi)
-        self.Theta = m.atan2( m.sin(self.Theta) , m.cos(self.Theta) )
-        '''
-
     def _FindVelocities(self, θ: float) -> tuple[float]:
         Vx = self.Robot.Vel_set * np.cos(θ)
         Vy = self.Robot.Vel_set * np.sin(θ)

@@ -1,26 +1,25 @@
-import math as m
-from dataclasses import dataclass
+import etc.data_structures as ds
+import Systems.robot as r
+import Systems.motor as m
+import numpy as np
+from dataclasses import dataclass, field
+
 
 @dataclass
 class Control:
-    y_set: float
-    V_set: float
-    dt   : float
-    DWR  : float
-    kP   : float
-    kI   : float
-    kD   : float
-    m    : float
-    V_max: float
-    V_min: float
-    
+    Robot: r.Robot
+    Data: ds.ControllerData
+    Sim: ds.SimulationData
+    Position: ds.Position
+
+    θ_e_prev: float = field(init = False)
+    Vei: float = field(init = False)
+
     def __post_init__(self):
-        self.Theta_set : float = 0
-        self.IError    : float = 0
-        self.ThetaError: float = 0
-        self.dV_cap    : float = self.V_set - self.V_min
-        self.beta      : float = self.DWR / self.m / self.dV_cap / self.dt
-        if self.V_set > self.V_max:
+        self.Vei = 0
+        self.θ_e_prev = 0
+        self.dV_cap    : float = self.Data.V_set - self.Robot.Motor.Data.V_min
+        if self.Data.V_set > self.Robot.Motor.Data.V_max:
             print(
                     f"Target voltage ({self.V_set} V) exceeds maximum allowable voltage ({self.V_max} V).\n"
                     f"Setting target voltage to maximum allowable voltage (V_set = {self.V_max} V).\n"
@@ -28,72 +27,39 @@ class Control:
             self.V_set = self.V_max
             self.dV_cap = self.V_max - self.V_min
 
-    def _SetTheta(self, y_new) -> float:
-        self.yError   : float = y_new - self.y_set
-        #Theta_set: float = m.atan(-self.yError)
-        Theta_set: float = m.tanh(-self.yError) * m.pi / 2
-        self.Theta_set = Theta_set
-        if __name__ == "__main__":
-            print(
-                    f"Position Error    : {float(self.yError):5.2f} m"
-                    )
-        return Theta_set
+    def _PIDTune(self, θ_e: float) -> float:
+        kp, ki, kd = self.Data.kp, self.Data.ki, self.Data.kd
+        δt = self.Sim.δt
+        θ_e_prev = self.θ_e_prev
+        Vep = kp * θ_e
+        self.Vei += ki * θ_e * δt
+        Ved = kd * (θ_e - θ_e_prev) / δt
+        return Vep + self.Vei + Ved
 
-    def _PIDTune(self, Theta_set, Theta_new) -> float:
-        ThetaError_new: float  = Theta_new - Theta_set
-        self.PError        : float  = self.kP * ThetaError_new
-        self.IError           += self.kI * ThetaError_new * self.dt
-        self.DError        : float  = self.kD * (ThetaError_new - self.ThetaError) / self.dt
-        self.TunedError    : float  = self.PError + self.IError + self.DError
-        self.ThetaError = ThetaError_new
-
-        return self.TunedError
-
-    def _FindAlpha(self, TunedError) -> float:
-        beta : float = self.beta
-        alpha: float = TunedError * beta
-        if alpha > 1:
-            alpha = 1
-        elif alpha < -1:
-            alpha = -1
-        return alpha
-
-    def FindVoltages(self, y_new, Theta_new) -> dict[float]:
-        Theta_set : float = self._SetTheta(y_new)
-        TunedError: float = self._PIDTune(Theta_set, Theta_new)
-        alpha     : float = self._FindAlpha(TunedError)
-        V         : float = self.V_set - abs(alpha) * self.dV_cap
-        if alpha > 0:
-            return {'Left Voltage': self.V_set, 'Right Voltage': V}
-        elif alpha < 0:
-            return {'Left Voltage': V, 'Right Voltage': self.V_set}
+    def _InterpretVoltageError(self, V_e: float) -> dict[float]:
+        V_set = self.Data.V_set
+        if V_e < 0:
+            Vnew = V_set + V_e if V_set + V_e > self.dV_cap else self.dV_cap
+            V = {"Left": V_set, "Right": Vnew}
         else:
-            return {'Left Voltage': self.V_set, 'Right Voltage': self.V_set}
+            Vnew = V_set - V_e if V_set - V_e > self.dV_cap else self.dV_cap
+            V = {"Left": Vnew, "Right": V_set}
+        return V
+
+    def FindVoltages(self) -> dict[float]:
+        y = self.Position.y
+        θ = self.Position.θ
+        y_e = y - self.Data.y_set
+        θ_e = θ - np.tanh(-y_e)
+        V_e = self._PIDTune(θ_e)
+        return self._InterpretVoltageError(V_e)
     
 def main() -> None:
-    y_set = 0
-    V_set = 5
-    dt = 0.1
-    PIDConstants = {'kP': 1, 'kI': 0, 'kD': 0}
-    DWR = 0.1 / (2 * 0.02)
-    MotorData = {'m': 3.8402, 'V_max': 6, 'V_min': 3}
+    CD = ds.ControllerData()
+    Robot = r.Robot(m.Motor(ds.MotorData()), ds.BodyData(), CD)
+    Controller = Control(Robot, CD, ds.SimulationData(), ds.Position())
 
-    y = ([0] * 3) + ([0.1] * 3) + ([-0.1] * 3)
-    u = ([0, 0.1, -0.1]) * 3
-    Test = Control(y_set, V_set, dt, DWR, **PIDConstants, **MotorData)
-    for i in range(9):
-        y_val = y[i]
-        u_val = u[i]
-        Test.IError = 0
-        print(f"\033[2J\033[H") # Clears the whole print screen!
-        print("==========TEST DATA===========")
-        print(f"Position          : {float(y_val):5.2f} m")
-        print(f"Orientation       : {float(u_val):5.2f} rad")
-        print("==============================")
-        print(Test)
-        print(Test.FindVoltages(y_val, u_val))
-
-        input("Press Enter to continue")
+    print(Controller.FindVoltages())
 
 if __name__ == "__main__":
     main()
