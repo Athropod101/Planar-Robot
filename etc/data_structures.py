@@ -52,7 +52,7 @@ class ControllerData:
     Set_Point               : float = 0 # m
     Set_Voltage             : float = 6 # V
     Proportional_Constant   : float = 5 # -
-    Integral_Constant       : float = 10 # -
+    Integral_Constant       : float = 20 # -
     Derivative_Constant     : float = 0 # -
 
     def __post_init__(self):

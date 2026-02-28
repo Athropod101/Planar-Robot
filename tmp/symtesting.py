@@ -9,7 +9,7 @@ A = Matrix([
     [-ki * kt, (Vset * ks - ki), -kp]
     ])
 
-A = A.subs([(ks, 0.54), (kt, π/2), (Vset, 1), (kp, 5), (ki, 10)])
+A = A.subs([(ks, 1), (kt, -π/2), (Vset, 0.5), (kp, 30), (ki, 30)])
 λ = A.eigenvals()
 real_parts = [val.as_real_imag()[0] for val in λ.keys()]
 

@@ -29,17 +29,16 @@ def MosaicRobot(Suptitle: str,
                 T_s: float = None, T_p: float = None) -> tuple[plt.Figure, plt.Axes, tb.Table]:
 
     fig, ax = plt.subplot_mosaic([
-        ['x(t)2', 'x(t)2'],
-        ['Poles', 'Table']],
+        ['x(t)1', 'Poles'],
+        ['x(t)2', 'Table']],
         layout = "constrained")
     fig.suptitle(Suptitle, fontsize = 16, fontweight = "bold")
 
-    for i in range(2)
+    for i in range(2):
         Response(ax[f'x(t){i + 1}'], x[i], t, xTitles[i], xLabels[i], T_s = T_s, T_p = T_p)
     Poles(ax['Poles'], σ, ω)
     tab = {"Left": None, "Right": None}
-    tab["Left"] = Table(ax['Left Table'], TableContents["Left"], TableTitles["Left"])
-    tab["Right"] = Table(ax['Right Table'], TableContents["Right"], TableTitles["Right"])
+    tab = Table(ax['Table'], TableContents, TableTitle)
     return fig, ax, tab
 
 def main() -> None:

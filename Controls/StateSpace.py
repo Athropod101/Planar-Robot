@@ -19,13 +19,15 @@ class StateSpace(ABC):
     Order   : int           = field(init = False)
     Stable  : bool          = field(init = False)
     T_s     : float | None  = field(init = False)
+    T_p     : float | None  = field(init = False)
     σ_d     : np.ndarray    = field(init = False)
     ω_d     : np.ndarray    = field(init = False)
 
     def __post_init__(self) -> None:
         self.Order = self.A.shape[0]
         self.Stable = self._CheckStability()
-        self.T_s = None if not self.Stable else 4 / min(abs(self.σ_d))
+        self.T_s = 4 / min(abs(self.σ_d)) if self.Stable else None
+        self.T_p = None
 
     def _CheckStability(self) -> bool:
         # Importing Attributes
@@ -36,7 +38,7 @@ class StateSpace(ABC):
         self.σ_d = λ.real
         self.ω_d = λ.imag
 
-        return True if (self.σ_d <= 0).any() else False
+        return True if not (self.σ_d > 0).any() else False
 
     def StepResponse(self, B: np.ndarray, Xo: np.ndarray = None, U: np.ndarray = None) -> np.ndarray:
         # Importing Attributes
@@ -47,20 +49,27 @@ class StateSpace(ABC):
         if Xo is None: Xo = np.zeros((N, 1))
         if U is None: U = np.ones((B.shape[1] ,1))
 
+        AiBU = inv(A) @ B @ U
+        i_max = 300
         if self.Stable:
             t_max = 1.5 * self.T_s
-            i_max = 300
             δt = t_max / i_max
+        else:
+            δt = 0.01
+        # NOTE: If no zero-crossing exists before i_max, simulation will crash.
+        # Probably better to make dinamic python list appends, then turn to np array, but I don't want to deal with that right now.
 
-            # Computing the integral
-            AiBU = inv(A) @ B @ U
-            xt = np.empty((N, i_max), dtype = float)
-            t = np.empty((1, i_max), dtype = float)
-            for i in range(i_max):
-                t[0, i] = δt * i
-                XT = expm(A * t[0, i]) @ (Xo + AiBU) - AiBU
-                xt[:, i] = XT.flatten()
-        # NOTE missing code for unstable case here.
+        # Computing the integral
+        xt = np.empty((N, i_max), dtype = float)
+        t = np.empty((1, i_max), dtype = float)
+        for i in range(i_max):
+            t[0, i] = δt * i
+            XT = expm(A * t[0, i]) @ (Xo + AiBU) - AiBU
+            xt[:, i] = XT.flatten()
+
+        if not self.Stable:
+            self.T_s = [t[xt[0] <= U][0]]
+
         return xt, t
 
 @dataclass
@@ -68,7 +77,6 @@ class SOStateSpace(StateSpace):
     Underdamped: bool  = field(init = False)
     ζ          : float = field(init = False)
     ω_n        : float = field(init = False)
-    T_p        : float = field(init = False)
     pOV        : float = field(init = False)
 
     def __post_init__(self) -> None:

@@ -7,7 +7,7 @@ def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     msize = 20
 
     Underdamped = not (ω[0] == ω[1])
-    w = ω[1] # Extracting positive frequency
+    w = max(ω) # Extracting positive frequency
 
     # Initial setup
     ax.set_title("S-Plane Stability", style = "italic")
@@ -68,17 +68,16 @@ def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
 
     # Underdamped Extra Lines
     if Underdamped:
-        # Percent Overshoot
-        ax.plot([σ[0], 0], [w, 0], color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0], 0], [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
+        for i in range(σ.shape[0]):
+            if ω[i] == 0: continue
+            # Percent Overshoot
+            ax.plot([σ[i], 0], [ω[i], 0], color = "black", linestyle = '--', alpha = 0.5)
 
-        # y-Lines
-        ax.plot([σ[0], 0], [w] * 2, color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0], 0], [-w] * 2, color = "black", linestyle = '--', alpha = 0.5)
+            # y-Lines
+            ax.plot([σ[i], 0], [ω[i]] * 2, color = "black", linestyle = '--', alpha = 0.5)
 
-        # x-Lines
-        ax.plot([σ[0]] * 2, [w, 0], color = "black", linestyle = '--', alpha = 0.5)
-        ax.plot([σ[0]] * 2, [-w, 0], color = "black", linestyle = '--', alpha = 0.5)
+            # x-Lines
+            ax.plot([σ[i]] * 2, [ω[i], 0], color = "black", linestyle = '--', alpha = 0.5)
 
 def Table(ax: plt.Axes, Collumns: dict, Title: str) -> tab.Table:
     colors = ['lightgray', 'white']
@@ -113,7 +112,8 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
     nbins = 8
     t = t * tscale
     Underdamped = True if T_p is not None else False
-    Stable = True if T_s is not None else False
+    Stable = True if not isinstance(T_s, list) else False
+    T_s = T_s[0] if not Stable else T_s
 
     # Initial Setup
     ax.plot(t, x, zorder = 5)
@@ -129,15 +129,15 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
     else: 
         ax.set_ylim(top = x[0])
 
-    # Setting Convergence Line if Stable
-    if Stable:
-        ax.axhline(
-                y = x[-1],
-                color = "black",
-                linestyle = '--',
-                alpha = 0.5,
-                zorder = 0,
-                )
+    # Setting Convergence/Zero-Crossing Line
+    y = x[-1] if Stable else x[t >= T_s * tscale][0]
+    ax.axhline(
+            y = y,
+            color = "black",
+            linestyle = '--',
+            alpha = 0.5,
+            zorder = 0,
+            )
 
     # Generating Ticks
     ax.xaxis.set_major_locator(tkr.MaxNLocator(nbins = nbins))
@@ -148,21 +148,20 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
 
     # Plotting Settling Time
     textloc = 0 if x[-1] >= 0 else 0.9
-    if Stable:
-        T_s = T_s * tscale
-        x_T_s = x[t >= T_s][0]
-        ax.plot([T_s] * 2, sorted([x_T_s, 0]), color = "black", linestyle = "--", alpha = 0.5)
-        ax.annotate(
-                r'$\mathregular{T_s}$' + f' = {int(T_s)} {unit}',
-                xy = (2/3, textloc),
-                xycoords = 'axes fraction',
-                xytext = (5, 5),
-                textcoords = 'offset points',
-                fontweight = 'bold'
-                )
+    T_s = T_s * tscale
+    x_T_s = x[t >= T_s][0]
+    ax.plot([T_s] * 2, sorted([x_T_s, 0]), color = "black", linestyle = "--", alpha = 0.5)
+    ax.annotate(
+            r'$\mathregular{T_s}$' + f' = {int(T_s)} {unit}',
+            xy = (2/3, textloc),
+            xycoords = 'axes fraction',
+            xytext = (5, 5),
+            textcoords = 'offset points',
+            fontweight = 'bold'
+            )
 
     # Plotting Peak Time
-    T_p_lim = 3/4 * T_s
+    T_p_lim = 3/4 * T_s if Stable else None
     if Underdamped:
         T_p = T_p * tscale
         x_T_p = x[t >= T_p][0]

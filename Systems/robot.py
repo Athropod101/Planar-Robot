@@ -36,6 +36,7 @@ class Robot:
         self.β = 2 * self.Body.r / self.Body.l
         self.γ = self.Motor.α * self.β
         self.ω_set = self.Motor.SetSpeed(self.Control.V_set)
+        self.Vel_set = self.ω_set * self.Body.r * π / 30
 
         # Handling Saturated Error
         self.A_sat = self._buildA("Saturated")
@@ -46,18 +47,32 @@ class Robot:
         TableTitles = {"Left": "Parameters", "Right": "System Dynamics"}
         Headers = {"Datum": None, "Symbol": None, "Value": None, "Unit": None}
         TableContents = {"Left": self._buildLeftTable(Headers), "Right": self._buildRightTable(Headers)}
-        self.Figure, self.Axes, self.Tables = MosaicMotor(
-                Suptitle = "Motor Feedback Analysis",
-                t = self.t_sat[0], x = θ_t, xTitle = "Unit Step Response", xLabel = "Angle (degrees)",
+        self.Figure_sat, self.Axes_sat, self.Tables_sat = MosaicMotor(
+                Suptitle = "Robot Saturated Error Analysis",
+                t = self.t_sat[0], x = θ_t, xTitle = "Step Response", xLabel = "Angle (degrees)",
                 σ = self.System_Sat.σ_d, ω = self.System_Sat.ω_d,
                 TableTitles = TableTitles, TableContents = TableContents,
                 T_s = self.System_Sat.T_s, T_p = self.System_Sat.T_p
+                )
+
+        # Handling Small Error
+        self.A_small = self._buildA("Small")
+        self.B_small = self._buildB("Small")
+        self.System_Small = StateSpace(self.A_small)
+        self.x_t_small, self.t_small = self.System_Small.StepResponse(self.B_small, U = np.array([[-0.1]]))
+        self.x_t_small[1] = self.x_t_small[1] * 180 / π
+        self.Figure_small, self.Axes_small, self.Table_small = MosaicRobot(
+                Suptitle = "Robot Small Error Analysis",
+                t = self.t_small[0], x = self.x_t_small, xTitles = ["Step Response (Position)", "Step Response (Orientation)"], xLabels = ["Positiom (m)", "Angle (degrees)"], 
+                σ = self.System_Small.σ_d, ω = self.System_Small.ω_d,
+                TableTitle = TableTitles["Left"], TableContents = TableContents["Left"],
+                T_s = self.System_Small.T_s, T_p = self.System_Small.T_p
                 )
  
     def _buildA(self, Mode: str) -> np.array:
         kp   = self.Control.kp
         ki   = self.Control.ki
-        V_set = self.Control.V_set
+        Vel_set = self.Vel_set
         match Mode:
             case "Saturated":
                 return np.array([
@@ -65,10 +80,10 @@ class Robot:
                     [-ki, -kp],
                     ])
             case "Small":
-                return no.array([
-                    [0,         V_set,   0],
-                    [0,            0,   1],
-                    [-ki * -π/2, -ki, -kp],
+                return np.array([
+                    [0,         Vel_set,   0],
+                    [0,               0,   1],
+                    [-ki * -π/2,    -ki, -kp],
                     ])
 
     def _buildB(self, Mode: str) -> np.array:
@@ -81,8 +96,8 @@ class Robot:
 
     def _buildLeftTable(self, Headers) -> list:
         cellData = [["Differential", "Wheel Radius", "Proportional", "Integral", "Derivative", "Set Voltage", "Set Wheel Speed"],
-                    ["l", "r", "kp", "ki", "kd", r"$\mathregular{V_{set}}$", r"$\mathregular{ω_{set}}$"],
-                    [f"{self.Body.l:.4f}", f"{self.Body.r:.4f}", f"{self.Control.kp:.4f}", f"{self.Control.ki:.4f}", f"{self.Control.kd:.4f}", f"{self.Control.V_set:.4f}", f"{self.ω_set:#.5g}"],
+                    ["l", "r", r"$\mathregular{k_{p}}$", r"$\mathregular{k_{i}}$", r"$\mathregular{k_{d}}$", r"$\mathregular{V_{set}}$", r"$\mathregular{ω_{set}}$"],
+                    [f"{self.Body.l:.4f}", f"{self.Body.r:.4f}", f"{self.Control.kp:.4f}", f"{self.Control.ki:.4f}", f"{self.Control.kd:.4f}", f"{self.Control.V_set:.4f}", f"{int(self.ω_set)}"],
                     ["m", "m", "--", "1/s", "s", "V", "rpm"],
                     ]
         return {header: col for header, col in zip(Headers.keys(), cellData)}

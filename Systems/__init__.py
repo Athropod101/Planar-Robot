@@ -5,5 +5,5 @@ from matplotlib import pyplot as plt, ticker as tkr
 
 import etc.data_structures as ds
 from Plotting.Primitives import *
-from Plotting.MosaicMotor import *
+from Plotting.Mosaics import *
 from Controls.StateSpace import *

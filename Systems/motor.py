@@ -4,7 +4,7 @@ import numpy as np
 # Project Modules
 import etc.data_structures as ds
 from Plotting.Primitives import *
-from Plotting.MosaicMotor import *
+from Plotting.Mosaics import *
 from Controls.StateSpace import *
 
 class VoltageOverload(Exception):
@@ -34,7 +34,7 @@ class Motor:
         TableContents = {"Left": self._buildLeftTable(Headers), "Right": self._buildRightTable(Headers)}
         self.Figure, self.Axes, self.Tables = MosaicMotor(
                 Suptitle = "Motor System Analysis",
-                t = self.t[0], x = self.x_t[1], xTitle = "Unit Step Response", xLabel = "Angular Velocity (rad/s)",
+                t = self.t[0], x = self.x_t[1] * 30 / π, xTitle = "Unit Step Response", xLabel = "Angular Velocity (rpm)",
                 σ = self.System.σ_d, ω = self.System.ω_d,
                 TableTitles = TableTitles, TableContents = TableContents,
                 T_s = self.System.T_s, T_p = self.System.T_p
