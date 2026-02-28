@@ -181,6 +181,55 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
                 fontweight = 'bold'
                 )
 
+def DualPlotMargins(ax: plt.Axes, t: list, x1: list, x2: list, Title: str, ylabel: str, legendlabels: list[str], bounds: list[float] = None) -> plt.Line2D:
+    ax.margins(x = 0)
+
+    # Drawing Empty Lines
+    Lines = [None] * 2
+    for i in range(2):
+        Lines[i], = ax.plot([], [])
+
+    # Drawing y-bound lines
+    y = []
+    if bounds == None:
+        y.append(0)
+        y.append(min(x1[1:] + x2[1:])) # Ignore first entry to ignore 0-initial conditions on capped quantities.
+        y.append(max(x1 + x2)) # 0-IC is free to be max if in our plots if applicable.
+    else:
+        y = bounds
+    for i in range(len(y)):
+        ax.axhline(
+                y = y[i],
+                color = "black",
+                linestyle = "--",
+                alpha = 0.5,
+                zorder = 0,
+                )
+
+    # Adjusting y-margins
+    if bounds == None:
+        margin = 1.05 # This is the default matplotlib margin. I have to set lims because the plot doesn't exist yet, so margins won't work properly.
+        ax.set_ylim(top = y[2] * margin, bottom = y[1] * margin)
+
+    # Setting Ticks
+    ax.set_xticks([0, t[-1]])
+    ax.set_yticks(sorted(y))
+
+    # Title and Labels
+    ax.set_title(Title)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel("Time (s)")
+
+    # Setting Legend
+    ax.legend(
+            labels = legendlabels,
+            fontsize = 'small',
+            handlelength = 0.1,
+            loc = 'center right',
+            )
+
+    return Lines
+
 def main() -> None:
     fig, ax = plt.subplots()
     # Testing Poles
