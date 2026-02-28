@@ -64,7 +64,7 @@ class ControllerData:
 
 @dataclass
 class SimulationData:
-    Sample_Time     : float = 0.001 # s
+    Sample_Time     : float = 0.1 # s
     Max_Iterations  : int   = 1e5   #
     Tolerance       : float = 0.001 #
 
@@ -79,13 +79,17 @@ class Position:
     x: float = 0 # m
     y: float = 0 # m
 
-    def __post_init__(self):
-        self.Vector = np.array([
+    @property
+    def Vector(self):
+        return np.array([
             [self.θ],
             [self.x],
             [self.y]
             ])
-        self.Pose = np.array([
+
+    @property
+    def Pose(self):
+        return np.array([
             [cos(self.θ), -sin(self.θ), self.x],
             [sin(self.θ),  cos(self.θ), self.y],
             [0,            0,           1     ]
