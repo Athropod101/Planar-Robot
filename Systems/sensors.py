@@ -1,12 +1,12 @@
-import numpy as np
 from dataclasses import dataclass
-from motor import Motor
-from data_structures import SensorData, MotorData
+import numpy as np
+import etc.data_structures as ds
+import Systems.motor as sys
 
 @dataclass
 class Sensor:
-    Data: SensorData
-    Motor: Motor
+    Data: ds.SensorData
+    Motor: sys.Motor
 
     def AddNoise(self) -> None:
         μ, σ_mult = self.Data.μ, self.Data.σ_mult

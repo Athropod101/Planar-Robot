@@ -4,7 +4,7 @@ import matplotlib.animation as ani
 from dataclasses import dataclass
 import numpy as np
 from math import degrees
-from data_structures import Pose
+from etc.data_structures import Position
 
 import matplotlib
 #matplotlib.use('kitcat')

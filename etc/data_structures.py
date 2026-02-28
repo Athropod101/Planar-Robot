@@ -12,7 +12,7 @@ from typing import Literal
 
 @dataclass
 class MotorData:
-    Eq_Viscosity    : float = 0.0020 # kgm2/s
+    Eq_Viscosity    : float = 0.1520 # kgm2/s
     Inertia         : float = 0.0010 # kgm2
     Motor_Constant  : float = 0.4500 # V/rad
     Resistance      : float = 0.9470 # Ω
@@ -51,9 +51,9 @@ class SensorData:
 class ControllerData:
     Set_Point               : float = 0 # m
     Set_Voltage             : float = 6 # V
-    Proportional_Constant   : float = 5 # -
-    Integral_Constant       : float = 20 # -
-    Derivative_Constant     : float = 0 # -
+    Proportional_Constant   : float = 2 # -
+    Integral_Constant       : float = 1 # -
+    Derivative_Constant     : float = 0.5 # -
 
     def __post_init__(self):
         self.y_set  = self.Set_Point
@@ -64,20 +64,22 @@ class ControllerData:
 
 @dataclass
 class SimulationData:
-    Sample_Time     : float = 0.1 # s
+    Sample_Time     : float = 0.1   # s
     Max_Iterations  : int   = 1e5   #
-    Tolerance       : float = 0.001 #
+    Tolerance       : float = 0.1 #
 
     def __post_init__(self):
         self.δt     = self.Sample_Time
-        self.i      = self.Max_Iterations
+        self.t      = [0]
+        self.i_max  = self.Max_Iterations
+        self.i      = 0
         self.TOL    = self.Tolerance
 
 @dataclass
 class Position:
     θ: float = 0 # rad
     x: float = 0 # m
-    y: float = 0 # m
+    y: float = 1 # m
 
     @property
     def Vector(self):

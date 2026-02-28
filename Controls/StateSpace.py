@@ -57,7 +57,7 @@ class StateSpace(ABC):
         else:
             δt = 0.01
         # NOTE: If no zero-crossing exists before i_max, simulation will crash.
-        # Probably better to make dinamic python list appends, then turn to np array, but I don't want to deal with that right now.
+        # Probably better to make dynamic python list appends, then turn to np array, but I don't want to deal with that right now.
 
         # Computing the integral
         xt = np.empty((N, i_max), dtype = float)
@@ -68,7 +68,12 @@ class StateSpace(ABC):
             xt[:, i] = XT.flatten()
 
         if not self.Stable:
-            self.T_s = [t[xt[0] <= U][0]]
+            zc = t[xt[0] <= U]
+            if zc.shape[0] == 0: 
+                print("No zero-crossing before max iteration found.")
+                self.T_s = t[0, -1]
+            else: 
+                self.T_s = zc[0]
 
         return xt, t
 

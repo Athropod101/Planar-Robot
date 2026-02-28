@@ -15,8 +15,7 @@ class Control:
 
 
     def __post_init__(self):
-        self.y_e = self.Data.y_set - self.Position.y
-        self.θ_e = np.tanh(-self.y_e) - self.Position.θ
+        self.FindError()
         self.dV_cap    : float = self.Data.V_set - self.Robot.Motor.Data.V_min
         if self.Data.V_set > self.Robot.Motor.Data.V_max:
             print(
@@ -43,11 +42,11 @@ class Control:
 
     def _InterpretVoltageError(self, V_e: float) -> dict[float]:
         V_set = self.Data.V_set
-        if V_e < 0:
-            Vnew = V_set + V_e if V_set + V_e > self.dV_cap else self.dV_cap
+        if V_e >= 0:
+            Vnew = V_set - V_e if V_set - V_e > self.dV_cap else self.dV_cap
             V = {"Left": V_set, "Right": Vnew}
         else:
-            Vnew = V_set - V_e if V_set - V_e > self.dV_cap else self.dV_cap
+            Vnew = V_set + V_e if V_set + V_e > self.dV_cap else self.dV_cap
             V = {"Left": Vnew, "Right": V_set}
         return V
 
@@ -57,7 +56,13 @@ class Control:
         y_e = self.y_e
         θ_e = self.θ_e
         V_e = self.PID(θ_e)
+        self.Error = np.sqrt(y_e**2 + θ_e**2)
         return self._InterpretVoltageError(V_e)
+
+    def FindError(self) -> None:
+        self.y_e = self.Position.y - self.Data.y_set 
+        self.θ_e =  self.Position.θ - np.tanh(-15 *self.y_e)
+        self.Error = np.sqrt(self.y_e**2 + self.θ_e**2)
     
 def main() -> None:
     CD = ds.ControllerData()

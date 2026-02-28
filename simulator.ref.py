@@ -83,12 +83,6 @@ OMEGALEFT : list[float] = []
 OMEGARIGHT: list[float] = []
 VLEFT     : list[float] = []
 VRIGHT    : list[float] = []
-
-uEPID     : list[float] = []
-uEP       : list[float] = []
-uEI       : list[float] = []
-uED       : list[float] = []
-theta_set : list[float] = []
 while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
     if i > MaxIter:
         break
@@ -132,42 +126,6 @@ while m.sqrt(Controller.yError**2 + Controller.ThetaError**2) > Tolerance:
     '''Control Data'''
     V = Controller.FindVoltages(RobotMotion.y, RobotMotion.Theta)
 
-    '''Printing'''
-    '''
-    print(f"\033[2J\033[H") # Clears the whole print screen!
-
-    print(
-            f"[ C O N T R O L ]\n"
-            f"Set Point    : {float(Controller.y_set):5.2f} m\n"
-            f"y-Error      : {float(Controller.yError):5.2f} m\n"
-            f"Set Angle    : {float(Controller.Theta_set):5.2f} rad\n"
-            f"Theta-Error  : {float(Controller.ThetaError):5.2f} rad\n"
-            f"Error Sum    : {float(Controller.yError + Controller.ThetaError):5.2f}\n"
-            f"Left Voltage : {float(V['Left Voltage']):5.2f} V\n"
-            f"Right Voltage: {float(V['Right Voltage']):5.2f} V\n"
-            )
-    
-    print(
-            f"[ M O T O R ]\n"
-            f"Left Omega   : {float(LeftOmega):5.2f} rad/s\n"
-            f"Right Omega  : {float(RightOmega):5.2f} rad/s\n"
-            )
-
-    print(
-            f"[ S E N S O R ]\n"
-            f"Left Omega   : {float(NoisyLeft):5.2f} rad/s\n"
-            f"Right Omega  : {float(NoisyRight):5.2f} rad/s\n"
-            )
-
-    print(
-            f"[ K I N E M A T I C S ]\n"
-            f"Omega        : {float(RobotMotion.Omega):5.2f} rad/s\n"
-            f"Speed        : {float(m.sqrt(RobotMotion.Vx**2 + RobotMotion.Vy**2)):5.2f} m/s\n"
-            f"Position (y) : {float(RobotMotion.y):5.2f} m\n"
-            f"Orientation  : {float(RobotMotion.Theta):5.2f} rad\n"
-            )
-    '''
-
 print(
     f"The robot converged on the set point after:\n"
     f"{i} iterations.\n"
@@ -177,32 +135,3 @@ print(
 SetOmega = LeftMotor.WriteVoltage(SetVoltage, rpm = True)
 #Plot = Plot(t, X, Y, U, yE, uE, OMEGA, OMEGALEFT, OMEGARIGHT, VLEFT, VRIGHT, SetPoint, SetVoltage, SetOmega, LeftMotor.MinVoltage)
 #Plot.Build()
-
-y_Error = {
-        "Net": yE,
-        "PID": yE,
-        "P"  : yE,
-        "I"  : yE,
-        "D"  : yE,
-        }
-
-theta_Error = {
-        "Net": uE,
-        "PID": uEPID,
-        "P"  : uEP,
-        "I"  : uEI,
-        "D"  : uED,
-        }
-
-ErrorPlot = ErrorPlots(
-        Time = t,
-        y = Y,
-        theta = U,
-        y_Error = y_Error,
-        theta_Error = theta_Error,
-        y_set = SetPoint,
-        theta_set = theta_set,
-        )
-plt.show()
-import matplotlib
-print(matplotlib.get_backend())
