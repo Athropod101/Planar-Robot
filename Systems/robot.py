@@ -42,7 +42,7 @@ class Robot:
         self.A_sat = self._buildA("Saturated")
         self.B_sat = self._buildB("Saturated")
         self.System_Sat = SOStateSpace(self.A_sat)
-        self.x_t_sat, self.t_sat = self.System_Sat.StepResponse(self.B_sat, U = np.array([[-π/2]]))
+        self.x_t_sat, self.t_sat = self.System_Sat.StepResponse(self.B_sat, U = np.array([[-π/2 * self.Control.kt]]))
         θ_t = self.x_t_sat[0] * 180 / π
         TableTitles = {"Left": "Parameters", "Right": "System Dynamics"}
         Headers = {"Datum": None, "Symbol": None, "Value": None, "Unit": None}
@@ -72,6 +72,7 @@ class Robot:
     def _buildA(self, Mode: str) -> np.array:
         kp   = self.Control.kp
         ki   = self.Control.ki
+        kt   = self.Control.kt
         Vel_set = self.Vel_set
         match Mode:
             case "Saturated":
@@ -83,7 +84,7 @@ class Robot:
                 return np.array([
                     [0,         Vel_set,   0],
                     [0,               0,   1],
-                    [-ki * -π/2,    -ki, -kp],
+                    [-ki * -π/2 * kt,    -ki, -kp],
                     ])
 
     def _buildB(self, Mode: str) -> np.array:
@@ -116,6 +117,9 @@ class Robot:
                       [f"{abs(self.System_Sat.σ_d[0]):#.4g}", SecondFreq[2], f"{self.System_Sat.ω_n:#.4g}", f"{self.System_Sat.ζ:#.4g}", f"{float(self.System_Sat.T_s * 1e3):#.4g}", T_p, pOV],
                       ["Hz", "Hz", "Hz", "--", "ms", "ms", "%"]]
         return {header: col for header, col in zip(Headers.keys(), cellData)}
+
+    def Speed(self, Voltage) -> float:
+        return Voltage * self.Motor.α * self.Body.r
 
 def main():
     Data = ds.MotorData()

@@ -41,7 +41,7 @@ class BodyData:
 @dataclass
 class SensorData:
     Mean                : float = 0 # rad/s
-    Deviation_Multiplier: float = 0 #
+    Deviation_Multiplier: float = 5 #
 
     def __post_init__(self):
         self.μ      = self.Mean
@@ -49,11 +49,12 @@ class SensorData:
 
 @dataclass
 class ControllerData:
-    Set_Point               : float = 1.1 # m
+    Set_Point               : float = 0 # m
     Set_Voltage             : float = 6 # V
-    Proportional_Constant   : float = 2 # -
+    Proportional_Constant   : float = 20 # -
     Integral_Constant       : float = 1 # -
-    Derivative_Constant     : float = 0.5 # -
+    Derivative_Constant     : float = 0.2 # -
+    Tanh_Constant           : float = 15
 
     def __post_init__(self):
         self.y_set  = self.Set_Point
@@ -61,10 +62,11 @@ class ControllerData:
         self.kp     = self.Proportional_Constant
         self.ki     = self.Integral_Constant
         self.kd     = self.Derivative_Constant
+        self.kt     = self.Tanh_Constant
 
 @dataclass
 class SimulationData:
-    Sample_Time     : float = 0.1   # s
+    Sample_Time     : float = 0.02  # s
     Max_Iterations  : int   = 1e5   #
     Tolerance       : float = 0.1 #
 
@@ -77,7 +79,7 @@ class SimulationData:
 
 @dataclass
 class Position:
-    θ: float = -3.14 # rad
+    θ: float = 0 # rad
     x: float = 0 # m
     y: float = 1 # m
 
@@ -91,8 +93,8 @@ class Position:
 
     @property
     def Pose(self):
-        return np.array([
+        return np.round(np.array([
             [cos(self.θ), -sin(self.θ), self.x],
             [sin(self.θ),  cos(self.θ), self.y],
             [0,            0,           1     ]
-            ])
+            ]), 2)

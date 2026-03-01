@@ -1,1 +1,1 @@
-from . import Mosaics, Primitives, plots
+from . import Mosaics, Primitives, plots, Animation

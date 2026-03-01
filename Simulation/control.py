@@ -1,4 +1,5 @@
 import etc.data_structures as ds
+from math import pi as π
 import Systems.robot as r
 import Systems.motor as m
 import numpy as np
@@ -61,7 +62,7 @@ class Control:
 
     def FindError(self) -> None:
         self.y_e = self.Position.y - self.Data.y_set 
-        self.θ_e =  self.Position.θ - np.tanh(-15 *self.y_e)
+        self.θ_e =  self.Position.θ - π / 2 * np.tanh(-self.Data.kt *self.y_e)
         self.Error = np.sqrt(self.y_e**2 + self.θ_e**2)
     
 def main() -> None:

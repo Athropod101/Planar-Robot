@@ -16,7 +16,7 @@ class State:
         self.y = [self.Controller.Position.y]
         self.y_e = [self.Controller.y_e]
         self.θ_e = [self.Controller.θ_e]
-        self.x, self.V_left, self.V_right, self.ω_left, self.ω_right, self.t, self.i = ([0] for _ in range(7))
+        self.x, self.V_left, self.V_right, self.Speed_left, self.Speed_right, self.t, self.i = ([0] for _ in range(7))
     def log(self, Position: ds.Position, Errors: list[float], Voltages: dict[float], Wheel_Speeds: dict[float]) -> None:
         self.i.append(self.i[-1] + 1)
         self.θ.append(Position.θ)
@@ -26,6 +26,6 @@ class State:
         self.θ_e.append(Errors[1])
         self.V_left.append(Voltages["Left"])
         self.V_right.append(Voltages["Right"])
-        self.ω_left.append(Wheel_Speeds["Left"])
-        self.ω_right.append(Wheel_Speeds["Right"])
+        self.Speed_left.append(Wheel_Speeds["Left"])
+        self.Speed_right.append(Wheel_Speeds["Right"])
         self.t.append(self.i[-1] * self.Data.δt)

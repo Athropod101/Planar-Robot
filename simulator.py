@@ -4,6 +4,7 @@ import Simulation as sim
 import numpy as np
 from Plotting import plots
 from Plotting import Primitives
+from Plotting import Animation
 import matplotlib.pyplot as plt
 
 def main(yamlfile) -> int:
@@ -36,20 +37,22 @@ def main(yamlfile) -> int:
     while (Controller.Error > SimulationData.TOL) and (State.i[-1] < SimulationData.i_max):
         V = Controller.FindVoltages()
         Motor.WriteVoltage(V)
+        Sensor.AddNoise()
         R, R_dot = Motion.FindKinematics()
         Controller.FindError()
-        State.log(R, [Controller.y_e, Controller.θ_e], V, Motor.ω)
-        #print(State.i[-1])
-        #input("")
+        Speed = {side: BodyData.r * w for side, w in Motor.ω.items()}
+        State.log(R, [Controller.y_e, Controller.θ_e], V, Speed)
 
     if State.i[-1] == SimulationData.i_max: print(f"ERROR: Simulation did not converge within {SimulationData.i_max} iterations.")
 
-    Plot = plots.Plot(State.t, State.x, State.y, State.θ, State.y_e, State.θ_e, [], State.ω_left, State.ω_right, State.V_left, State.V_right, Controller.Data.y_set, Controller.Data.V_set, Motor.SetSpeed(Controller.Data.V_set), Motor.Data.V_min)
-    testfig, ax = plt.subplots()
-    #Primitives.DualPlotMargins(ax, State.t, State.y_e, State.θ_e, "Voltage", "Voltage", ["Left Voltage", "Right Voltage"])
-    Line =Primitives.MapMargins(ax, State.x, State.y, ControllerData.y_set)
-    Line.set_xdata(State.x)
-    Line.set_ydata(State.y)
+    anim = Animation.MosaicAnimation(State.t, ControllerData.y_set)
+    anim.BuildMap(State.x, State.y)
+    anim.BuildMarker(State.θ)
+    anim.BuildErrors(State.y_e, State.θ_e)
+    anim.BuildSpeeds(State.Speed_left, State.Speed_right, [Robot.Speed(MotorData.V_min), Robot.Speed(ControllerData.V_set)])
+    anim.BuildVolts(State.V_left, State.V_right, [MotorData.V_min, MotorData.V_max])
+
+    animation = anim.Animate()
     plt.show()
 
 if __name__ == "__main__":

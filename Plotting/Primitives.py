@@ -1,8 +1,10 @@
 # NOTE: posibilities for future improvements:
 # 1. Make a function "DashLine" for all the horizontal and vertical lines.
-from matplotlib import pyplot as plt, ticker as tkr, table as tab
+from matplotlib import pyplot as plt, ticker as tkr, table as tab, text as txt
 from dataclasses import dataclass, field
 import numpy as np
+import etc.data_structures as ds
+from math import degrees
 
 def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     nbins = 8
@@ -183,7 +185,7 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
                 fontweight = 'bold'
                 )
 
-def DualPlotMargins(ax: plt.Axes, t: list, x1: list, x2: list, Title: str, ylabel: str, legendlabels: list[str], bounds: list[float] = None) -> plt.Line2D:
+def DualPlotFrame(ax: plt.Axes, t: list, x1: list, x2: list, Title: str, ylabel: str, legendlabels: list[str], bounds: list[float] = None) -> plt.Line2D:
     ax.margins(x = 0)
 
     # Drawing Empty Lines
@@ -232,7 +234,7 @@ def DualPlotMargins(ax: plt.Axes, t: list, x1: list, x2: list, Title: str, ylabe
 
     return Lines
 
-def MapMargins(ax: plt.Axes, x: list, y: list, y_set) -> plt.Line2D:
+def MapFrame(ax: plt.Axes, x: list, y: list, y_set) -> plt.Line2D:
     # Making the line
     Line, = ax.plot([], [])
 
@@ -267,7 +269,25 @@ def MapMargins(ax: plt.Axes, x: list, y: list, y_set) -> plt.Line2D:
     ax.set_ylabel("y-Position (m)")
     return Line
 
+def Marker(ax: plt.Axes, θ, x, y) -> plt.Line2D:
+    Line, = ax.plot(x, y, marker = (3, 0, (degrees(θ) + 30)),
+            markersize = 15,
+            linestyle = '-',
+            color = 'cyan',
+            mec = 'black',
+            )
+    return Line
 
+def PoseText(ax: plt.Axes, Pose: ds.Position) -> txt.Text:
+    Pose = ax.text(
+            x = 0.975,
+            y = 0.5,
+            s = Pose.Pose,
+            transform = ax.transAxes,
+            ha = 'right',
+            va = 'center',
+            )
+    return Pose
 
 def main() -> None:
     fig, ax = plt.subplots()
