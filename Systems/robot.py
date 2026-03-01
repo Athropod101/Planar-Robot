@@ -42,7 +42,7 @@ class Robot:
         self.A_sat = self._buildA("Saturated")
         self.B_sat = self._buildB("Saturated")
         self.System_Sat = SOStateSpace(self.A_sat)
-        self.x_t_sat, self.t_sat = self.System_Sat.StepResponse(self.B_sat, U = np.array([[-π/2 * self.Control.kt]]))
+        self.x_t_sat, self.t_sat = self.System_Sat.StepResponse(self.B_sat, U = np.array([[-π/2]]))
         θ_t = self.x_t_sat[0] * 180 / π
         TableTitles = {"Left": "Parameters", "Right": "System Dynamics"}
         Headers = {"Datum": None, "Symbol": None, "Value": None, "Unit": None}

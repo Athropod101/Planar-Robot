@@ -1,9 +1,9 @@
-Test Name: "No Noise, High Error, Moderate Tangent Action"
+Test Name: "High Noise, High Error"
 
 Initial Position:
   θ: 0.00 # rad
   x: 0.00 # m | Simulation may behave unexpectedly if not 0
-  y: 1.00 # m
+  y: -1.0 # m
 
 Motor Data:
   D    : 1.0000 # kgm2/s
@@ -20,15 +20,15 @@ Body Data:
 
 Sensor Data:
   μ     : 0 # rad/s | Simulation may behave unexpectedly if not 0.
-  σ_mult: 0 #
+  σ_mult: 5 #
 
 Controller Data:
   y_set: 0.000 # m
   V_set: 6.000 # V
-  kp   : 1.000 # | Simulation will break if 0.
-  ki   : 0.001 # 1/s | Simulation will break if 0.
-  kd   : 0.000 # s
-  kt   : 5.00 # 1/m
+  kp   : 20.00 # | Simulation will break if 0.
+  ki   : 1.000 # 1/s | Simulation will break if 0.
+  kd   : 0.200 # s
+  kt   : 15.00 # 1/m
 
 Simulation Data:
   δt   : 0.0750 # s

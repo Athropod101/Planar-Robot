@@ -9,11 +9,15 @@ class MosaicAnimation:
     y_set: float
 
     def __post_init__(self):
+        AR, dpi = ParseConfig()
+        width = AR[0] / dpi
+        height = AR[1] / dpi
         self.fig, self.ax = plt.subplot_mosaic([
             ['Map', 'Map', 'Errors'],
             ['Map', 'Map', 'Speeds'],
             ['Map', 'Map', 'Voltages']],
-            layout = "constrained")
+            layout = "constrained",
+            figsize = (width, height), dpi = dpi)
         self.fig.suptitle("Robot Runtime Animation", fontsize = 16, fontweight = "bold")
         self.Line = [None] * 8
         self.Pose = PoseText(self.ax['Map'], ds.Position(0, 0, 0))
@@ -95,3 +99,8 @@ class MosaicAnimation:
                 interval = interval,
                 )
         return animation
+
+def ParseConfig() -> tuple[list[int], int]:
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)['Figure Data']
+        return config['Aspect Ratio'], config['dpi']

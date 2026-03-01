@@ -1,4 +1,4 @@
-Test Name: "No Noise, High Error, Moderate Tangent Action"
+Test Name: "No Noise, High Error, No PID"
 
 Initial Position:
   θ: 0.00 # rad
@@ -25,10 +25,10 @@ Sensor Data:
 Controller Data:
   y_set: 0.000 # m
   V_set: 6.000 # V
-  kp   : 1.000 # | Simulation will break if 0.
+  kp   : 1.00 # | Simulation will break if 0.
   ki   : 0.001 # 1/s | Simulation will break if 0.
   kd   : 0.000 # s
-  kt   : 5.00 # 1/m
+  kt   : 15.00 # 1/m
 
 Simulation Data:
   δt   : 0.0750 # s

@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import etc.data_structures as ds
 from math import degrees
+import yaml
 
 def Poles(ax: plt.Axes, σ: np.array, ω: np.array) -> None:
     nbins = 8
@@ -110,6 +111,8 @@ def Table(ax: plt.Axes, Collumns: dict, Title: str) -> tab.Table:
             loc = 'upper center', cellLoc = 'center', colColours = [HeaderColor] * m)
     Table.auto_set_font_size(False)
     Table.set_fontsize(11)
+    C, R = GetTableScale()
+    Table.scale(C, R)
     return Table
 
 def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, unit: str = "ms", tscale: float = 1e3, T_s: float = None, T_p: float = None) -> None:
@@ -288,6 +291,12 @@ def PoseText(ax: plt.Axes, Pose: ds.Position) -> txt.Text:
             va = 'center',
             )
     return Pose
+
+def GetTableScale() -> tuple[list[int]]:
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    TAR = config['Figure Data']['Table Scale']
+    return (TAR['Cols'], TAR['Rows'])
 
 def main() -> None:
     fig, ax = plt.subplots()

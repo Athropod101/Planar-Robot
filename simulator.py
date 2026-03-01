@@ -1,20 +1,34 @@
+# Standard Library
+import os
+import shutil
+
+# External Libraries
+import matplotlib.pyplot as plt
+import matplotlib.animation as ani
+import numpy as np
+import yaml
+import ffmpeg
+
+# Project Libraries
 import etc.data_structures as ds
 import Systems as sys
 import Simulation as sim
-import numpy as np
 from Plotting import plots
 from Plotting import Primitives
 from Plotting import Animation
-import matplotlib.pyplot as plt
 
-def main(yamlfile) -> int:
-    # NOTE: Replace this segment with yaml reading later
-    MotorData = ds.MotorData()
-    ControllerData = ds.ControllerData()
-    SensorData = ds.SensorData()
-    BodyData = ds.BodyData()
-    SimulationData = ds.SimulationData()
-    Position = ds.Position()
+def main() -> int:
+    # Parsing config
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+
+    TestName = config["Test Name"]
+    Position = ds.Position(**config["Initial Position"])
+    MotorData = ds.MotorData(**config["Motor Data"])
+    ControllerData = ds.ControllerData(**config["Controller Data"])
+    SensorData = ds.SensorData(**config["Sensor Data"])
+    BodyData = ds.BodyData(**config["Body Data"])
+    SimulationData = ds.SimulationData(**config["Simulation Data"])
 
     # System Initailization
     Motor = sys.motor.Motor(MotorData)
@@ -22,7 +36,7 @@ def main(yamlfile) -> int:
     Robot = sys.robot.Robot(Motor, BodyData, ControllerData)
 
     frac = Motor.System.T_s / SimulationData.δt * 100
-    if frac > 10000:
+    if frac > 10:
         print(
                 f"WARNING: Motor response time fraction is {frac:.2f}% > 10.00% !!! Simulation will be innacurate.\n"
                 f"If you would like to continue the simulation anyway, write \"continue\".\nOtherwise, the simulation will be aborted.")
@@ -55,5 +69,18 @@ def main(yamlfile) -> int:
     animation = anim.Animate()
     plt.show()
 
+    # Saving Files
+    os.makedirs(f"Results/{TestName}", exist_ok = True)
+    shutil.copy("config.yaml", f"Results/{TestName}/config.yaml")
+    figures = [Motor.Figure, Robot.Figure_sat, Robot.Figure_small]
+    figTitles = ["Motor System Analysis", "Robot Saturated Error Analysis", "Robot Small Error Analysis"]
+
+    for i in range(len(figures)):
+        figures[i].savefig(f"Results/{TestName}/{figTitles[i]}.svg", bbox_inches = 'tight')
+
+    fps = len(State.t) / State.t[-1]
+    animation.save(f"Results/{TestName}/Animation.gif", writer='ffmpeg', fps = fps)
+
+
 if __name__ == "__main__":
-    main([])
+    main()

@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from matplotlib import pyplot as plt, table as tb
 from Plotting.Primitives import *
+import yaml
 
 def MosaicMotor(Suptitle: str, 
                 t: np.array, x: np.array, xTitle: str, xLabel: str,
@@ -9,10 +10,14 @@ def MosaicMotor(Suptitle: str,
                 TableTitles: dict[str], TableContents: dict[dict],
                 T_s: float = None, T_p: float = None) -> tuple[plt.Figure, plt.Axes, tb.Table]:
 
+    AR, dpi = ParseConfig()
+    width = AR[0] / dpi
+    height = AR[1] / dpi
     fig, ax = plt.subplot_mosaic([
         ['x(t)', 'Poles'],
         ['Left Table', 'Right Table']],
-        layout = "constrained")
+        layout = "constrained",
+        figsize = (width, height), dpi = dpi)
     fig.suptitle(Suptitle, fontsize = 16, fontweight = "bold")
 
     Response(ax['x(t)'], x, t, xTitle, xLabel, T_s = T_s, T_p = T_p)
@@ -28,10 +33,14 @@ def MosaicRobot(Suptitle: str,
                 TableTitle: str, TableContents: dict[list],
                 T_s: float = None, T_p: float = None) -> tuple[plt.Figure, plt.Axes, tb.Table]:
 
+    AR, dpi = ParseConfig()
+    width = AR[0] / dpi
+    height = AR[1] / dpi
     fig, ax = plt.subplot_mosaic([
         ['x(t)1', 'Poles'],
         ['x(t)2', 'Table']],
-        layout = "constrained")
+        layout = "constrained",
+        figsize = (width, height))
     fig.suptitle(Suptitle, fontsize = 16, fontweight = "bold")
 
     for i in range(2):
@@ -40,6 +49,11 @@ def MosaicRobot(Suptitle: str,
     tab = {"Left": None, "Right": None}
     tab = Table(ax['Table'], TableContents, TableTitle)
     return fig, ax, tab
+
+def ParseConfig() -> tuple[list[int], int]:
+    with open("config.yaml", "r") as f:
+        config = yaml.safe_load(f)['Figure Data']
+        return config['Aspect Ratio'], config['dpi']
 
 def main() -> None:
     Suptitle = "Mosaic Test"

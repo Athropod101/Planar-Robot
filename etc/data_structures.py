@@ -12,70 +12,43 @@ from typing import Literal
 
 @dataclass
 class MotorData:
-    Eq_Viscosity    : float = 0.1520 # kgm2/s
-    Inertia         : float = 0.0010 # kgm2
-    Motor_Constant  : float = 0.4500 # V/rad
-    Resistance      : float = 0.9470 # Ω
-    Inductance      : float = 0.0020 # Ωs
-    Max_Voltage     : float = 6.0000 # V
-    Min_Voltage     : float = 3.0000 # V
-
-    def __post_init__(self):
-        self.D      = self.Eq_Viscosity
-        self.J      = self.Inertia
-        self.k      = self.Motor_Constant
-        self.R      = self.Resistance
-        self.L      = self.Inductance
-        self.V_max  = self.Max_Voltage
-        self.V_min  = self.Min_Voltage
+    D    : float = 0.1520 # kgm2/s
+    J    : float = 0.0010 # kgm2
+    k    : float = 0.4500 # V/rad
+    R    : float = 0.9470 # Ω
+    L    : float = 0.0020 # Ωs
+    V_min: float = 3.0000 # V
+    V_max: float = 6.0000 # V
 
 @dataclass
 class BodyData:
-    Wheel_Radius: float = 0.05 # m
-    Differential: float = 0.10 # m
-
-    def __post_init__(self):
-        self.r = self.Wheel_Radius
-        self.l = self.Differential
+    r: float = 0.05 # m
+    l: float = 0.10 # m
 
 @dataclass
 class SensorData:
-    Mean                : float = 0 # rad/s
-    Deviation_Multiplier: float = 5 #
-
-    def __post_init__(self):
-        self.μ      = self.Mean
-        self.σ_mult = self.Deviation_Multiplier
+    μ     : float = 0 # rad/s
+    σ_mult: float = 5 #
 
 @dataclass
 class ControllerData:
-    Set_Point               : float = 0 # m
-    Set_Voltage             : float = 6 # V
-    Proportional_Constant   : float = 20 # -
-    Integral_Constant       : float = 1 # -
-    Derivative_Constant     : float = 0.2 # -
-    Tanh_Constant           : float = 15
-
-    def __post_init__(self):
-        self.y_set  = self.Set_Point
-        self.V_set  = self.Set_Voltage
-        self.kp     = self.Proportional_Constant
-        self.ki     = self.Integral_Constant
-        self.kd     = self.Derivative_Constant
-        self.kt     = self.Tanh_Constant
+    y_set: float = 0   # m
+    V_set: float = 6   # V
+    kp   : float = 20  # -
+    ki   : float = 1   # -
+    kd   : float = 0.2 # -
+    kt   : float = 15
 
 @dataclass
 class SimulationData:
-    Sample_Time     : float = 0.02  # s
-    Max_Iterations  : int   = 1e5   #
-    Tolerance       : float = 0.1 #
+    δt     : float = 0.02  # s
+    i_max  : int   = 1e5   #
+    Tol       : float = 0.1   #
 
     def __post_init__(self):
-        self.δt     = self.Sample_Time
         self.t      = [0]
-        self.i_max  = self.Max_Iterations
         self.i      = 0
-        self.TOL    = self.Tolerance
+        self.TOL    = self.Tol
 
 @dataclass
 class Position:
