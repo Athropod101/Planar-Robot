@@ -1,0 +1,34 @@
+Initial Position:
+  θ: 0.00
+  x: 0.00
+  y: 1.00
+
+Motor Data:
+  μ    : 0.1520
+  J    : 0.0100
+  k    : 0.4500
+  R    : 1.0000
+  L    : 0.0020
+  V min: 3.0000
+  V max: 6.0000
+
+Body Data:
+  r: 0.050
+  l: 0.100
+
+Sensor Data:
+  μ     : 0
+  σ mult: 1
+
+Controller Data:
+  y set: 0
+  V set: 6
+  kp   : 20
+  ki   : 1
+  kd   : 0.2
+  kt   : 15
+
+Simulation Data:
+  δt   : 0.02
+  i max: 1.e5
+  Tol  : 0.01
