@@ -36,7 +36,7 @@ def main() -> int:
     Robot = sys.robot.Robot(Motor, BodyData, ControllerData)
 
     frac = Motor.System.T_s / SimulationData.δt * 100
-    if frac > 10:
+    if frac > 15:
         print(
                 f"WARNING: Motor response time fraction is {frac:.2f}% > 10.00% !!! Simulation will be innacurate.\n"
                 f"If you would like to continue the simulation anyway, write \"continue\".\nOtherwise, the simulation will be aborted.")
@@ -67,6 +67,12 @@ def main() -> int:
     anim.BuildVolts(State.V_left, State.V_right, [MotorData.V_min, MotorData.V_max])
 
     animation = anim.Animate()
+
+    # Checking robot voltages
+    V_t = [u / Robot.γ for u in Robot.x_t_sat[1]]
+    vifg, vax = plt.subplots()
+    vax.plot(Robot.t_sat.squeeze(), V_t)
+    print(Robot.γ)
     plt.show()
 
     # Saving Files

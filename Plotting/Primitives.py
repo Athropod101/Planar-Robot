@@ -171,7 +171,8 @@ def Response(ax: plt.Axes, x: np.array, t: np.array, Title: str, xlabel: str, un
     T_p_lim = 3/4 * T_s if Stable else None
     if Underdamped:
         T_p = T_p * tscale
-        x_T_p = x[t >= T_p][0]
+        try :x_T_p = x[t >= T_p][0]
+        except: x_T_P = t[-1]
     elif Stable:
         x_T_p = np.max(x)
         T_p = t[x == x_T_p][0] # Have to index it cause otherwise its a (1,) array...
@@ -259,12 +260,18 @@ def MapFrame(ax: plt.Axes, x: list, y: list, y_set) -> plt.Line2D:
         if lim[0] > -minlim: lim[0] = -minlim
         if lim[1] <  minlim: lim[1] =  minlim
         minlim = minlim - y_set
-    ax.set_xlim([lim * margins for lim in xlims])
+    #ax.set_xlim([lim * margins for lim in xlims])
     ax.set_ylim([lim * margins for lim in ylims])
+    '''Embedding a very crude fix to x-lims to ensure the plot is centered around x = 0 but also 1:1 AR with y'''
+    xlim = sum(ylims) / 2
+    ax.set_xlim(sorted([-xlim, xlim]))
 
     # Setting Ticks
     ax.set_xticks([0, round(x[-1], 2)])
     ax.set_yticks(sorted([y_set, y[0]]))
+
+    # Setting Equal Aspect Ratio
+    ax.set_aspect('equal')
 
     # Setting Titles
     ax.set_title("Robot Position Map")

@@ -6,12 +6,12 @@ Initial Position:
   y: 1.00 # m
 
 Motor Data:
-  D    : 1.7500 # kgm2/s
+  D    : 2.0000 # kgm2/s
   J    : 0.0100 # kgm2
   k    : 0.5000 # V/rad
   R    : 0.5000 # Ω
   L    : 0.0010 # Ωs
-  V_min: 3.0000 # V
+  V_min: 0.0000 # V
   V_max: 6.0000 # V
 
 Body Data:
@@ -23,16 +23,16 @@ Sensor Data:
   σ_mult: 0 #
 
 Controller Data:
-  y_set: -0.100 # m
+  y_set: 0.000 # m
   V_set: 6.000 # V
-  kp   : 10.000 # | Simulation will break if 0.
-  ki   : 15.000 # 1/s | Simulation will break if 0.
+  kp   : 5.000 # | Simulation will break if 0.
+  ki   : 2.000 # 1/s | Simulation will break if 0.
   kd   : 0.000 # s
-  kt   : 5.00 # 1/m
+  kt   : 15.00 # 1/m
 
 Simulation Data:
-  δt   : 0.100 # s
-  i_max: 10000 # 1.0e+5 #
+  δt   : 0.00100 # s
+  i_max: 1000000 # 1.0e+5 #
   Tol  : 0.0100 # no unit since Tol is based on error magnitude of position and orientation errors
 
 Figure Data:

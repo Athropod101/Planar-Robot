@@ -33,7 +33,7 @@ class Robot:
 
     def __post_init__(self):
         # Constant Computing
-        self.β = 2 * self.Body.r / self.Body.l
+        self.β = self.Body.r / self.Body.l
         self.γ = self.Motor.α * self.β
         self.ω_set = self.Motor.SetSpeed(self.Control.V_set)
         self.Vel_set = self.ω_set * self.Body.r * π / 30
@@ -56,44 +56,53 @@ class Robot:
                 )
 
         # Handling Small Error
+        y_set = 0.01
         self.A_small = self._buildA("Small")
         self.B_small = self._buildB("Small")
         self.System_Small = StateSpace(self.A_small)
-        self.x_t_small, self.t_small = self.System_Small.StepResponse(self.B_small, U = np.array([[-0.1]]))
+        self.x_t_small, self.t_small = self.System_Small.StepResponse(self.B_small, U = np.array([[y_set]]))
         self.x_t_small[1] = self.x_t_small[1] * 180 / π
         self.Figure_small, self.Axes_small, self.Table_small = MosaicRobot(
                 Suptitle = "Robot Small Error Analysis",
-                t = self.t_small[0], x = self.x_t_small, xTitles = ["Step Response (Position)", "Step Response (Orientation)"], xLabels = ["Positiom (m)", "Angle (degrees)"], 
+                t = self.t_small[0], x = self.x_t_small, xTitles = ["Step Response (Position)", "Step Response (Orientation)"], xLabels = ["Position (m)", "Angle (degrees)"], 
                 σ = self.System_Small.σ_d, ω = self.System_Small.ω_d,
                 TableTitle = TableTitles["Left"], TableContents = TableContents["Left"],
                 T_s = self.System_Small.T_s, T_p = self.System_Small.T_p
                 )
+        # Adding the set point line:
+        if self.System_Small.Stable:
+            t_zc = self.t_small.squeeze()[self.x_t_small[0] >= y_set][0] * 1000
+            self.Axes_small['x(t)1'].plot([0, t_zc], [y_set] * 2, linestyle = "--", color = "black", alpha = 0.5, zorder = 0)
+            self.Axes_small['x(t)1'].plot([t_zc] * 2, [0, y_set], linestyle = "--", color = "black", alpha = 0.5, zorder = 0)
  
     def _buildA(self, Mode: str) -> np.array:
         kp   = self.Control.kp
         ki   = self.Control.ki
         kt   = self.Control.kt
+        γ    = self.γ
         Vel_set = self.Vel_set
         match Mode:
             case "Saturated":
                 return np.array([
                     [0  ,   1],
-                    [-ki, -kp],
+                    [-γ * ki, -kp * γ],
                     ])
             case "Small":
                 return np.array([
                     [0,         Vel_set,   0],
                     [0,               0,   1],
-                    [-ki * -π/2 * kt,    -ki, -kp],
+                    [- π/2 * kt,    -ki * γ, -kp * γ],
                     ])
 
     def _buildB(self, Mode: str) -> np.array:
         ki = self.Control.ki
+        kt = self.Control.kt
+        γ = self.γ
         match Mode:
             case "Saturated":
-                return np.array([[0], [ki]])
+                return np.array([[0], [γ * ki]])
             case "Small":
-                return np.array([[0], [0], [ki]])
+                return np.array([[0], [0], [π/2 * kt *γ * ki]])
 
     def _buildLeftTable(self, Headers) -> list:
         cellData = [["Differential", "Wheel Radius", "Proportional", "Integral", "Derivative", "Set Voltage", "Set Wheel Speed"],
