@@ -68,11 +68,6 @@ def main() -> int:
 
     animation = anim.Animate()
 
-    # Checking robot voltages
-    V_t = [u / Robot.γ for u in Robot.x_t_sat[1]]
-    vifg, vax = plt.subplots()
-    vax.plot(Robot.t_sat.squeeze(), V_t)
-    print(Robot.γ)
     plt.show()
 
     # Saving Files

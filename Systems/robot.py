@@ -105,10 +105,10 @@ class Robot:
                 return np.array([[0], [0], [π/2 * kt *γ * ki]])
 
     def _buildLeftTable(self, Headers) -> list:
-        cellData = [["Differential", "Wheel Radius", "Proportional", "Integral", "Derivative", "Set Voltage", "Set Wheel Speed"],
-                    ["l", "r", r"$\mathregular{k_{p}}$", r"$\mathregular{k_{i}}$", r"$\mathregular{k_{d}}$", r"$\mathregular{V_{set}}$", r"$\mathregular{ω_{set}}$"],
-                    [f"{self.Body.l:.4f}", f"{self.Body.r:.4f}", f"{self.Control.kp:.4f}", f"{self.Control.ki:.4f}", f"{self.Control.kd:.4f}", f"{self.Control.V_set:.4f}", f"{int(self.ω_set)}"],
-                    ["m", "m", "--", "1/s", "s", "V", "rpm"],
+        cellData = [["Differential", "Wheel Radius", "Proportional", "Integral", "Derivative", "Tangent", "Set Voltage", "Set Wheel Speed"],
+                    ["l", "r", r"$\mathregular{k_{p}}$", r"$\mathregular{k_{i}}$", r"$\mathregular{k_{d}}$", r"$\mathregular{k_{t}}$", r"$\mathregular{V_{set}}$", r"$\mathregular{ω_{set}}$"],
+                    [f"{self.Body.l:.4f}", f"{self.Body.r:.4f}", f"{self.Control.kp:.4f}", f"{self.Control.ki:.4f}", f"{self.Control.kd:.4f}", f"{self.Control.kt:.4f}", f"{self.Control.V_set:.4f}", f"{int(self.ω_set)}"],
+                    ["m", "m", "--", "1/s", "s", "1/m", "V", "rpm"],
                     ]
         return {header: col for header, col in zip(Headers.keys(), cellData)}
 

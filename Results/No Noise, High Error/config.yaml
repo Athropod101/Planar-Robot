@@ -1,4 +1,4 @@
-Test Name: "High Noise, High Error"
+Test Name: "No Noise, High Error"
 
 Initial Position:
   θ: 0.00 # rad
@@ -20,7 +20,7 @@ Body Data:
 
 Sensor Data:
   μ     : 0 # rad/s | Simulation may behave unexpectedly if not 0.
-  σ_mult: 5 #
+  σ_mult: 0 #
 
 Controller Data:
   y_set: 0.0000 # m
